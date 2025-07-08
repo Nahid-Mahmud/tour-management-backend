@@ -20,8 +20,7 @@ export enum IsActive {
 }
 
 export interface IUser {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   password?: string;
   role: UserRole;
