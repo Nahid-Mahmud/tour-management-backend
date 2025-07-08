@@ -1,26 +1,27 @@
 /* eslint-disable no-console */
 import { Server } from "http";
 import mongoose from "mongoose";
-import config from "./app/config";
+
 import { app } from "./app";
+import envVariables from "./app/config/env";
 
 let server: Server;
 
 const startServer = async () => {
-  if (!config.MONGO_URI) {
+  if (!envVariables.MONGO_URI) {
     console.error("MONGO_URI is not defined in the environment variables.");
     return;
   }
-  if (!config.PORT) {
+  if (!envVariables.PORT) {
     console.error("PORT is not defined in the environment variables.");
     return;
   }
 
   try {
-    await mongoose.connect(config.MONGO_URI);
+    await mongoose.connect(envVariables.MONGO_URI);
 
-    server = app.listen(config.PORT, () => {
-      console.log(`Server is running on port ${config.PORT}`);
+    server = app.listen(envVariables.PORT, () => {
+      console.log(`Server is running on port ${envVariables.PORT}`);
     });
   } catch (error) {
     console.error("Error connecting to the database:", error);

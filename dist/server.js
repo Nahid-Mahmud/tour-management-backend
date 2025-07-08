@@ -13,22 +13,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const config_1 = __importDefault(require("./app/config"));
 const app_1 = require("./app");
+const env_1 = __importDefault(require("./app/config/env"));
 let server;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
-    if (!config_1.default.MONGO_URI) {
+    if (!env_1.default.MONGO_URI) {
         console.error("MONGO_URI is not defined in the environment variables.");
         return;
     }
-    if (!config_1.default.PORT) {
+    if (!env_1.default.PORT) {
         console.error("PORT is not defined in the environment variables.");
         return;
     }
     try {
-        yield mongoose_1.default.connect(config_1.default.MONGO_URI);
-        server = app_1.app.listen(config_1.default.PORT, () => {
-            console.log(`Server is running on port ${config_1.default.PORT}`);
+        yield mongoose_1.default.connect(env_1.default.MONGO_URI);
+        server = app_1.app.listen(env_1.default.PORT, () => {
+            console.log(`Server is running on port ${env_1.default.PORT}`);
         });
     }
     catch (error) {
