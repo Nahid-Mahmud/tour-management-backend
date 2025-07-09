@@ -18,7 +18,7 @@ const getAllUsers = catchAsync(async (_req: Request, res: Response, _next: NextF
   res.status(StatusCodes.OK).json({
     success: true,
     message: "Users retrieved successfully",
-    users,
+    data: users,
   });
 });
 
