@@ -12,7 +12,8 @@ const creteUser = async (payload: Partial<IUser>) => {
 
 const getAllUsers = async () => {
   const users = await User.find({});
-  return users;
+  const totalUsers = await User.countDocuments();
+  return { data: users, meta: totalUsers };
 };
 
 export const userServices = {
