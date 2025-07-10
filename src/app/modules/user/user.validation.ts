@@ -27,5 +27,4 @@ export const createUserSchema = z.object({
   phone: z.string().regex(/^(?:\+880|880|0)(1[3-9])[0-9]{8}$/, {
     message: `Phone number must be a valid Bangladeshi mobile number (e.g., +8801XXXXXXXXX, 8801XXXXXXXXX, or 01XXXXXXXXX) `,
   }),
-  address: z.string().optional(),
 });
