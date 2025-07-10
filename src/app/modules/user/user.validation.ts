@@ -24,8 +24,7 @@ export const createUserSchema = z.object({
     })
     .regex(/[^A-Za-z0-9]/, {
       message: "Password must contain at least one special character",
-    })
-    .optional(),
+    }),
   phone: z
     .string()
     .regex(/^(?:\+880|880|0)(1[3-9])[0-9]{8}$/, {
