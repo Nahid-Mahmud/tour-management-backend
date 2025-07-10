@@ -1,8 +1,10 @@
-export default class AppError extends Error {
+class AppError extends Error {
   public statusCode: number;
+
   constructor(statusCode: number, message: string, stack = "") {
-    super(message);
+    super(message); // throw new Error("Something went wrong")
     this.statusCode = statusCode;
+
     if (stack) {
       this.stack = stack;
     } else {
@@ -10,3 +12,5 @@ export default class AppError extends Error {
     }
   }
 }
+
+export default AppError;
