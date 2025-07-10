@@ -1,5 +1,5 @@
 import z from "zod";
-import { IsActive } from "./user.interface";
+import { IsActive, UserRole } from "./user.interface";
 
 export const createUserSchema = z.object({
   name: z
@@ -35,6 +35,27 @@ export const updateUserSchema = z.object({
     .string()
     .min(2, { message: "Name must be at least 2 characters long" })
     .max(50, { message: "Name must not exceed 50 characters" })
+    .optional(),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters long" })
+    .regex(/[A-Z]/, {
+      message: "Password must contain at least one uppercase letter",
+    })
+    .regex(/[a-z]/, {
+      message: "Password must contain at least one lowercase letter",
+    })
+    .regex(/[0-9]/, {
+      message: "Password must contain at least one number",
+    })
+    .regex(/[^A-Za-z0-9]/, {
+      message: "Password must contain at least one special character",
+    })
+    .optional(),
+  role: z
+    .enum(Object.values(UserRole), {
+      message: `Role must be one of the following: ${Object.values(UserRole).join(", ")}`,
+    })
     .optional(),
   email: z
     .string()
