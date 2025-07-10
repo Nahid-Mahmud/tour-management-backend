@@ -1,11 +1,20 @@
+import AppError from "../../errorHelpers/AppError";
 import { IUser } from "./user.interface";
 import User from "./user.model";
+import { StatusCodes } from "http-status-codes";
 
 const creteUser = async (payload: Partial<IUser>) => {
-  const { name, email } = payload;
+  const { email, ...rest } = payload;
+
+  // check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new AppError(StatusCodes.CONFLICT, "User already exists with this email");
+  }
+
   const user = await User.create({
-    name,
     email,
+    ...rest,
   });
   return user;
 };
