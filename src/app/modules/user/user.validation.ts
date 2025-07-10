@@ -24,10 +24,14 @@ export const createUserSchema = z.object({
     })
     .regex(/[^A-Za-z0-9]/, {
       message: "Password must contain at least one special character",
-    }),
-  phone: z.string().regex(/^(?:\+880|880|0)(1[3-9])[0-9]{8}$/, {
-    message: `Phone number must be a valid Bangladeshi mobile number (e.g., +8801XXXXXXXXX, 8801XXXXXXXXX, or 01XXXXXXXXX) `,
-  }),
+    })
+    .optional(),
+  phone: z
+    .string()
+    .regex(/^(?:\+880|880|0)(1[3-9])[0-9]{8}$/, {
+      message: `Phone number must be a valid Bangladeshi mobile number (e.g., +8801XXXXXXXXX, 8801XXXXXXXXX, or 01XXXXXXXXX) `,
+    })
+    .optional(),
 });
 
 export const updateUserSchema = z.object({
