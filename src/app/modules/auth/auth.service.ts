@@ -1,9 +1,9 @@
 import bcryptjs from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
+import { generateToken } from "../../../utils/jwt";
+import envVariables from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import User from "../user/user.model";
-import jwt from "jsonwebtoken";
-import envVariables from "../../config/env";
 
 const credentialLogin = async (payload: { email: string; password: string }) => {
   const { email, password } = payload;
@@ -34,9 +34,7 @@ const credentialLogin = async (payload: { email: string; password: string }) => 
     role: user.role,
   };
 
-  const accessToken = jwt.sign(accessTokenPayload, envVariables.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+  const accessToken = generateToken(accessTokenPayload, envVariables.JWT_SECRET, envVariables.JWT_EXPIRATION);
 
   return {
     accessToken,
