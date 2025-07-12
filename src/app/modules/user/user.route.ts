@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { verifyToken } from "../../../utils/jwt";
 import envVariables from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import { validateRequest } from "../../middlewares/validateRequest";
@@ -19,9 +19,9 @@ router.get(
       if (!accessToken) {
         throw new AppError(StatusCodes.UNAUTHORIZED, "Access token is required");
       }
-      const verifiedToken = jwt.verify(accessToken, envVariables.JWT_SECRET);
+      const verifiedToken = verifyToken(accessToken, envVariables.JWT_SECRET);
 
-      const role = (verifiedToken as JwtPayload).role;
+      const role = verifiedToken.role;
 
       //   if (role !== UserRole.ADMIN || role !== UserRole.SUPER_ADMIN) {
       //     throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to access this resource");
