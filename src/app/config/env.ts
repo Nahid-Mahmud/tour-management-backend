@@ -7,6 +7,8 @@ interface EnvVariables {
   MONGO_URI: string;
   NODE_ENV: "development" | "production";
   JWT_SECRET: string;
+  JWT_EXPIRATION: string;
+  BCRYPT_SALT_ROUNDS: string;
 }
 
 const loadEnvVariable = (): EnvVariables => {
@@ -23,6 +25,8 @@ const loadEnvVariable = (): EnvVariables => {
     MONGO_URI: process.env.MONGO_URI as string,
     NODE_ENV: process.env.NODE_ENV as "development" | "production",
     JWT_SECRET: process.env.JWT_SECRET as string,
+    JWT_EXPIRATION: process.env.JWT_EXPIRATION as string,
+    BCRYPT_SALT_ROUNDS: process.env.BCRYPT_SALT_ROUNDS as string,
   };
 };
 
