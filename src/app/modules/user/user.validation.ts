@@ -60,11 +60,6 @@ export const updateUserSchema = z.object({
       message: `Role must be one of the following: ${Object.values(UserRole).join(", ")}`,
     })
     .optional(),
-  email: z
-    .string()
-    .email({ message: "Invalid email format" })
-    .max(100, { message: "Email must not exceed 100 characters" })
-    .optional(),
   phone: z
     .string()
     .regex(/^(?:\+880|880|0)(1[3-9])[0-9]{8}$/, {
