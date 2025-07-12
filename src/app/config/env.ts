@@ -6,6 +6,7 @@ interface EnvVariables {
   PORT: string;
   MONGO_URI: string;
   NODE_ENV: "development" | "production";
+  JWT_SECRET: string;
 }
 
 const loadEnvVariable = (): EnvVariables => {
@@ -21,6 +22,7 @@ const loadEnvVariable = (): EnvVariables => {
     PORT: process.env.PORT as string,
     MONGO_URI: process.env.MONGO_URI as string,
     NODE_ENV: process.env.NODE_ENV as "development" | "production",
+    JWT_SECRET: process.env.JWT_SECRET as string,
   };
 };
 
