@@ -1,9 +1,11 @@
 import { StatusCodes } from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
 import { hashPassword } from "../../../utils/hashPassword";
 import AppError from "../../errorHelpers/AppError";
-import { IAuthProvider, IUser } from "./user.interface";
+import { IAuthProvider, IUser, UserRole } from "./user.interface";
 import User from "./user.model";
 
+// create user
 const creteUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
@@ -33,6 +35,51 @@ const creteUser = async (payload: Partial<IUser>) => {
   return user;
 };
 
+// update user
+const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken: JwtPayload) => {
+  // check if user exists
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  // role update validation
+  if (payload.role) {
+    if (decodedToken.role === UserRole.USER || decodedToken.role === UserRole.GUIDE) {
+      throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
+    }
+    if (payload.role === UserRole.SUPER_ADMIN && decodedToken.role === UserRole.ADMIN) {
+      throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
+    }
+  }
+
+  // isActive, isDeleted, isVerified update validation
+  if (payload.isActive || payload.isDeleted || payload.isVerified) {
+    if (decodedToken.role === UserRole.USER || decodedToken.role === UserRole.GUIDE) {
+      throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user status");
+    }
+  }
+
+  // password update hashing
+  if (payload.password) {
+    payload.password = await hashPassword(payload.password as string);
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: payload,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  return updatedUser;
+};
+
+// get all users
 const getAllUsers = async () => {
   const users = await User.find({});
   const totalUsers = await User.countDocuments();
@@ -42,4 +89,5 @@ const getAllUsers = async () => {
 export const userServices = {
   creteUser,
   getAllUsers,
+  updateUser,
 };
