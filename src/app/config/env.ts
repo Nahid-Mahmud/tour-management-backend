@@ -9,6 +9,8 @@ interface EnvVariables {
   JWT_SECRET: string;
   JWT_EXPIRATION: string;
   BCRYPT_SALT_ROUNDS: string;
+  SUPER_ADMIN_EMAIL: string;
+  SUPER_ADMIN_PASSWORD: string;
 }
 
 const loadEnvVariable = (): EnvVariables => {
@@ -27,6 +29,8 @@ const loadEnvVariable = (): EnvVariables => {
     JWT_SECRET: process.env.JWT_SECRET as string,
     JWT_EXPIRATION: process.env.JWT_EXPIRATION as string,
     BCRYPT_SALT_ROUNDS: process.env.BCRYPT_SALT_ROUNDS as string,
+    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
+    SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
   };
 };
 
