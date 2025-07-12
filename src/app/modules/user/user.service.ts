@@ -66,16 +66,10 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
     payload.password = await hashPassword(payload.password as string);
   }
 
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    {
-      $set: payload,
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const updatedUser = await User.findByIdAndUpdate(userId, payload, {
+    new: true,
+    runValidators: true,
+  });
   return updatedUser;
 };
 

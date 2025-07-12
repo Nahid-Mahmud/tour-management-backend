@@ -4,7 +4,10 @@ import StatusCodes from "http-status-codes";
 import { catchAsync } from "../../../utils/catchAsync";
 import { userServices } from "./user.service";
 import sendResponse from "../../../utils/sendResponse";
+import { verifyToken } from "../../../utils/jwt";
+import envVariables from "../../config/env";
 
+// create user
 const createUser = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   const user = await userServices.creteUser(req.body);
   sendResponse(res, {
@@ -15,6 +18,24 @@ const createUser = catchAsync(async (req: Request, res: Response, _next: NextFun
   });
 });
 
+// update user
+
+const updateUser = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  const userId = req.params.userId;
+  const token = req.headers.authorization;
+
+  const decodedToken = verifyToken(token as string, envVariables.JWT_SECRET);
+  const user = await userServices.updateUser(userId, req.body, decodedToken);
+
+  sendResponse(res, {
+    success: true,
+    message: "User updated successfully",
+    data: user,
+    statusCode: StatusCodes.OK,
+  });
+});
+
+// get all users
 const getAllUsers = catchAsync(async (_req: Request, res: Response, _next: NextFunction) => {
   const result = await userServices.getAllUsers();
   sendResponse(res, {
@@ -31,4 +52,5 @@ const getAllUsers = catchAsync(async (_req: Request, res: Response, _next: NextF
 export const userControllers = {
   createUser,
   getAllUsers,
+  updateUser,
 };
