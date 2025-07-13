@@ -2,10 +2,8 @@
 import { NextFunction, Request, Response } from "express";
 import StatusCodes from "http-status-codes";
 import { catchAsync } from "../../../utils/catchAsync";
-import { userServices } from "./user.service";
 import sendResponse from "../../../utils/sendResponse";
-import { verifyToken } from "../../../utils/jwt";
-import envVariables from "../../config/env";
+import { userServices } from "./user.service";
 
 // create user
 const createUser = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
@@ -22,9 +20,7 @@ const createUser = catchAsync(async (req: Request, res: Response, _next: NextFun
 
 const updateUser = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   const userId = req.params.userId;
-  const token = req.headers.authorization;
-
-  const decodedToken = verifyToken(token as string, envVariables.JWT_SECRET);
+  const decodedToken = req.user;
   const user = await userServices.updateUser(userId, req.body, decodedToken);
 
   sendResponse(res, {
