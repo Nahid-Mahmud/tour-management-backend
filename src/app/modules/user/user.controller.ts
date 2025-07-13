@@ -4,6 +4,9 @@ import StatusCodes from "http-status-codes";
 import { catchAsync } from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { userServices } from "./user.service";
+import { verifyToken } from "../../../utils/jwt";
+import envVariables from "../../config/env";
+import AppError from "../../errorHelpers/AppError";
 
 // create user
 const createUser = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
@@ -20,7 +23,13 @@ const createUser = catchAsync(async (req: Request, res: Response, _next: NextFun
 
 const updateUser = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   const userId = req.params.userId;
-  const decodedToken = req.user;
+  // const decodedToken = req.user;
+  const token = req.headers.authorization;
+  if (!token) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Access token is required");
+  }
+
+  const decodedToken = verifyToken(token, envVariables.JWT_SECRET);
   const user = await userServices.updateUser(userId, req.body, decodedToken);
 
   sendResponse(res, {
