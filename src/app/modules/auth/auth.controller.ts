@@ -38,7 +38,7 @@ const generateAuthTokens = catchAsync(async (req: Request, res: Response, _next:
   const response = await authServices.getNewAccessToken(refreshToken);
   res.cookie("accessToken", response.accessToken, {
     httpOnly: true,
-    secure: envVariables.NODE_ENV === "production",
+    // secure: envVariables.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 60 * 60 * 1000 * 24, // 1 day
   });
