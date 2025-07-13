@@ -16,7 +16,18 @@ interface EnvVariables {
 }
 
 const loadEnvVariable = (): EnvVariables => {
-  const requiredEnvVariables = ["PORT", "MONGO_URI", "NODE_ENV"];
+  const requiredEnvVariables = [
+    "PORT",
+    "MONGO_URI",
+    "NODE_ENV",
+    "BCRYPT_SALT_ROUNDS",
+    "SUPER_ADMIN_EMAIL",
+    "SUPER_ADMIN_PASSWORD",
+    "ACCESS_TOKEN_JWT_SECRET",
+    "ACCESS_TOKEN_JWT_EXPIRATION",
+    "REFRESH_TOKEN_JWT_SECRET",
+    "REFRESH_TOKEN_JWT_EXPIRATION",
+  ];
 
   requiredEnvVariables.forEach((key) => {
     if (!process.env[key]) {
