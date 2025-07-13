@@ -13,7 +13,7 @@ export const checkAuth =
       if (!accessToken) {
         throw new AppError(StatusCodes.UNAUTHORIZED, "Access token is required");
       }
-      const verifiedToken = verifyToken(accessToken, envVariables.JWT_SECRET);
+      const verifiedToken = verifyToken(accessToken, envVariables.ACCESS_TOKEN_JWT_SECRET);
       req.user = verifiedToken;
 
       const role = verifiedToken.role;

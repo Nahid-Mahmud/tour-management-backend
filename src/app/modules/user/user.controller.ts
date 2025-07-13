@@ -4,9 +4,6 @@ import StatusCodes from "http-status-codes";
 import { catchAsync } from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { userServices } from "./user.service";
-import { verifyToken } from "../../../utils/jwt";
-import envVariables from "../../config/env";
-import AppError from "../../errorHelpers/AppError";
 
 // create user
 const createUser = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {

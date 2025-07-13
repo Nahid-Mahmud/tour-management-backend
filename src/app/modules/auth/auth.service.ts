@@ -34,7 +34,11 @@ const credentialLogin = async (payload: { email: string; password: string }) => 
     role: user.role,
   };
 
-  const accessToken = generateToken(accessTokenPayload, envVariables.JWT_SECRET, envVariables.JWT_EXPIRATION);
+  const accessToken = generateToken(
+    accessTokenPayload,
+    envVariables.ACCESS_TOKEN_JWT_SECRET,
+    envVariables.ACCESS_TOKEN_JWT_EXPIRATION
+  );
 
   return {
     accessToken,
