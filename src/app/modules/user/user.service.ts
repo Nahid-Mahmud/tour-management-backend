@@ -37,11 +37,6 @@ const creteUser = async (payload: Partial<IUser>) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: userPassword, ...userWithoutPassword } = user.toObject();
 
-  // return user without password
-  if (!userWithoutPassword) {
-    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, "User creation failed");
-  }
-
   return userWithoutPassword;
 };
 
