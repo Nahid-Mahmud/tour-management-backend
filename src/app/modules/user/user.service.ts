@@ -74,14 +74,13 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
   const updatedUser = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,
-    projection: { password: 0 },
-  });
+  }).select("-password");
   return updatedUser;
 };
 
 // get all users
 const getAllUsers = async () => {
-  const users = await User.find({});
+  const users = await User.find({}).select("-password");
   const totalUsers = await User.countDocuments();
   return { data: users, meta: totalUsers };
 };

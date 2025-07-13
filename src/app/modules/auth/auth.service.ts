@@ -14,7 +14,6 @@ const credentialLogin = async (payload: { email: string; password: string }) => 
 
   // check if use exists
   const user = await User.findOne({ email });
-
   if (!user) {
     throw new AppError(StatusCodes.UNAUTHORIZED, "User not found with this email");
   }
@@ -28,21 +27,32 @@ const credentialLogin = async (payload: { email: string; password: string }) => 
 
   // generate access token
 
-  const accessTokenPayload = {
+  const jwtPayload = {
     userId: user._id,
     email: user.email,
     role: user.role,
   };
 
   const accessToken = generateToken(
-    accessTokenPayload,
+    jwtPayload,
     envVariables.ACCESS_TOKEN_JWT_SECRET,
     envVariables.ACCESS_TOKEN_JWT_EXPIRATION
   );
 
+  const refreshToken = generateToken(
+    jwtPayload,
+    envVariables.REFRESH_TOKEN_JWT_SECRET,
+    envVariables.REFRESH_TOKEN_JWT_EXPIRATION
+  );
+
+  // remove password from response
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password: userPassword, ...userWithoutPassword } = user.toObject();
+
   return {
     accessToken,
-    user,
+    user: userWithoutPassword,
+    refreshToken,
   };
 };
 
