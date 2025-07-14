@@ -6,11 +6,6 @@ interface TokenInfo {
 }
 
 export const setAuthCookie = (res: Response, tokenInfo: TokenInfo) => {
-  //   res.cookie("accessToken", token, {
-  //     httpOnly: true,
-  //     secure: process.env.NODE_ENV === "production",
-  //     sameSite: "strict",
-  //   });
 
   if (tokenInfo.accessToken) {
     res.cookie("accessToken", tokenInfo.accessToken, {
