@@ -42,7 +42,29 @@ const generateAuthTokens = catchAsync(async (req: Request, res: Response, _next:
   });
 });
 
+const logout = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: envVariables.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+
+  sendResponse(res, {
+    success: true,
+    message: "User logged out successfully",
+    statusCode: 200,
+    data: null,
+  });
+});
+
 export const authControllers = {
   credentialLogin,
   generateAuthTokens,
+  logout,
 };
