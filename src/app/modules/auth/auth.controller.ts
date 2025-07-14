@@ -3,17 +3,19 @@ import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { catchAsync } from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
-import { setCookie } from "../../../utils/setCookie";
+import { setAuthCookie } from "../../../utils/setCookie";
 import envVariables from "../../config/env";
 import { authServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
+import { generateAuthTokens } from "../../../utils/userTokens";
+import { JwtPayload } from "jsonwebtoken";
 
 const credentialLogin = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   //  validate email and password and returns user auth tokens
   const response = await authServices.credentialLogin(req.body);
 
   // set cookies for access and refresh tokens
-  setCookie(res, {
+  setAuthCookie(res, {
     accessToken: response.accessToken,
     refreshToken: response.refreshToken,
   });
@@ -26,13 +28,13 @@ const credentialLogin = catchAsync(async (req: Request, res: Response, _next: Ne
   });
 });
 
-const generateAuthTokens = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+const generateAccessTokensUsingRefreshToken = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   const refreshToken = req.cookies.refreshToken;
   // validate refresh token and generate new access token
-  const response = await authServices.getNewAccessToken(refreshToken);
+  const response = await authServices.generateAccessTokensUsingRefreshToken(refreshToken);
 
   // set new access token cookie
-  setCookie(res, {
+  setAuthCookie(res, {
     accessToken: response.accessToken,
   });
 
@@ -68,14 +70,9 @@ const logout = catchAsync(async (req: Request, res: Response, _next: NextFunctio
 const resetPassword = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   const decodedToken = req.user;
 
-  if (!decodedToken) {
-    throw new AppError(StatusCodes.UNAUTHORIZED, "You are not authorized to perform this action");
-  }
-
-  // console.log(decodedToken);
   const { oldPassword, newPassword } = req.body;
 
-  await authServices.resetPassword(oldPassword, newPassword, decodedToken);
+  await authServices.resetPassword(oldPassword, newPassword, decodedToken as JwtPayload);
 
   sendResponse(res, {
     success: true,
@@ -85,9 +82,29 @@ const resetPassword = catchAsync(async (req: Request, res: Response, _next: Next
   });
 });
 
+const googleCallback = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  const user = req.user;
+
+  if (!user) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "User not found");
+  }
+
+  // set cookies for access and refresh tokens
+
+  const tokenInfo = generateAuthTokens(user);
+
+  setAuthCookie(res, {
+    accessToken: tokenInfo.accessToken,
+    refreshToken: tokenInfo.refreshToken,
+  });
+
+  res.redirect(envVariables.FRONTEND_URL);
+});
+
 export const authControllers = {
   credentialLogin,
-  generateAuthTokens,
   logout,
   resetPassword,
+  googleCallback,
+  generateAccessTokensUsingRefreshToken,
 };
