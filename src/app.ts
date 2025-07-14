@@ -6,9 +6,18 @@ import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
 import passport from "passport";
+import expressSession from "express-session";
 
 export const app = express();
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET || "defaultSecret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
