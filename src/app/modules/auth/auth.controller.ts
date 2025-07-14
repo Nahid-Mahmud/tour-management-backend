@@ -98,7 +98,7 @@ const googleCallback = catchAsync(async (req: Request, res: Response, _next: Nex
     refreshToken: tokenInfo.refreshToken,
   });
 
-  res.redirect(envVariables.FRONTEND_URL);
+  res.redirect(`${envVariables.FRONTEND_URL}`);
 });
 
 export const authControllers = {
