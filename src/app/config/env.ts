@@ -13,6 +13,8 @@ interface EnvVariables {
   ACCESS_TOKEN_JWT_EXPIRATION: string;
   REFRESH_TOKEN_JWT_SECRET: string;
   REFRESH_TOKEN_JWT_EXPIRATION: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
 }
 
 const loadEnvVariable = (): EnvVariables => {
@@ -27,6 +29,8 @@ const loadEnvVariable = (): EnvVariables => {
     "ACCESS_TOKEN_JWT_EXPIRATION",
     "REFRESH_TOKEN_JWT_SECRET",
     "REFRESH_TOKEN_JWT_EXPIRATION",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
   ];
 
   requiredEnvVariables.forEach((key) => {
@@ -46,6 +50,8 @@ const loadEnvVariable = (): EnvVariables => {
     ACCESS_TOKEN_JWT_EXPIRATION: process.env.ACCESS_TOKEN_JWT_EXPIRATION as string,
     REFRESH_TOKEN_JWT_SECRET: process.env.REFRESH_TOKEN_JWT_SECRET as string,
     REFRESH_TOKEN_JWT_EXPIRATION: process.env.REFRESH_TOKEN_JWT_EXPIRATION as string,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
   };
 };
 
