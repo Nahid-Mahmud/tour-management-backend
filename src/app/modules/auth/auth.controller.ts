@@ -5,6 +5,7 @@ import sendResponse from "../../../utils/sendResponse";
 import { authServices } from "./auth.service";
 import envVariables from "../../config/env";
 import { setCookie } from "../../../utils/setCookie";
+import { StatusCodes } from "http-status-codes";
 
 const credentialLogin = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   //  validate email and password and returns user auth tokens
@@ -63,8 +64,24 @@ const logout = catchAsync(async (req: Request, res: Response, _next: NextFunctio
   });
 });
 
+const resetPassword = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  const decodedToken = req.user;
+  // console.log(decodedToken);
+  const { oldPassword, newPassword } = req.body;
+
+  await authServices.resetPassword(oldPassword, newPassword, decodedToken);
+
+  sendResponse(res, {
+    success: true,
+    message: "Password reset successfully",
+    statusCode: StatusCodes.OK,
+    data: null,
+  });
+});
+
 export const authControllers = {
   credentialLogin,
   generateAuthTokens,
   logout,
+  resetPassword,
 };
