@@ -5,7 +5,7 @@ interface TokenInfo {
   refreshToken?: string;
 }
 
-export const setCookie = (res: Response, tokenInfo: TokenInfo) => {
+export const setAuthCookie = (res: Response, tokenInfo: TokenInfo) => {
   //   res.cookie("accessToken", token, {
   //     httpOnly: true,
   //     secure: process.env.NODE_ENV === "production",
