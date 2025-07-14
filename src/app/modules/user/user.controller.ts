@@ -5,6 +5,7 @@ import { catchAsync } from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { userServices } from "./user.service";
 import AppError from "../../errorHelpers/AppError";
+import { JwtPayload } from "jsonwebtoken";
 
 // create user
 const createUser = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
@@ -24,13 +25,7 @@ const updateUser = catchAsync(async (req: Request, res: Response, _next: NextFun
 
   const decodedToken = req.user;
 
-  if (!decodedToken) {
-    throw new AppError(StatusCodes.UNAUTHORIZED, "You are not authorized to perform this action");
-  }
-
-  
-
-  const user = await userServices.updateUser(userId, req.body, decodedToken);
+  const user = await userServices.updateUser(userId, req.body, decodedToken as JwtPayload);
 
   sendResponse(res, {
     success: true,
