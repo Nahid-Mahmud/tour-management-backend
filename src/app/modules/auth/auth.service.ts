@@ -59,7 +59,7 @@ const credentialLogin = async (payload: { email: string; password: string }) => 
   };
 };
 
-const getNewAccessToken = async (refreshToken: string) => {
+const generateAccessTokensUsingRefreshToken = async (refreshToken: string) => {
   const newAccessToken = await createNewRefreshToken(refreshToken);
 
   return {
@@ -68,6 +68,10 @@ const getNewAccessToken = async (refreshToken: string) => {
 };
 
 const resetPassword = async (oldPassword: string, newPassword: string, decodedToken: JwtPayload) => {
+  if (!decodedToken) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "You are not authorized to perform this action");
+  }
+
   // validate old password and new password
   if (oldPassword === newPassword) {
     throw new AppError(StatusCodes.BAD_REQUEST, "New password must be different from old password");
@@ -102,7 +106,6 @@ const resetPassword = async (oldPassword: string, newPassword: string, decodedTo
 
 export const authServices = {
   credentialLogin,
-  getNewAccessToken,
-  generateAuthTokens,
+  generateAccessTokensUsingRefreshToken,
   resetPassword,
 };
