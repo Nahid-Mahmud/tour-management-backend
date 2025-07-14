@@ -14,12 +14,13 @@ export const checkAuth =
         throw new AppError(StatusCodes.UNAUTHORIZED, "Access token is required");
       }
       const verifiedToken = verifyToken(accessToken, envVariables.ACCESS_TOKEN_JWT_SECRET);
-      req.user = verifiedToken;
 
       const role = verifiedToken.role;
       if (!authRoles.includes(role)) {
         throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to access this resource");
       }
+
+      req.user = verifiedToken;
 
       next();
     } catch (error) {

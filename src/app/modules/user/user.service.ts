@@ -44,7 +44,16 @@ const creteUser = async (payload: Partial<IUser>) => {
 const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken: JwtPayload) => {
   // check if user exists
 
-  const user = await User.findById(userId);
+  if (
+    userId !== decodedToken.userId &&
+    decodedToken.role !== UserRole.SUPER_ADMIN &&
+    decodedToken.role !== UserRole.ADMIN
+  ) {
+    throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to update this user");
+  }
+
+  const user = await User.findById(decodedToken.userId);
+
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, "User not found");
   }
