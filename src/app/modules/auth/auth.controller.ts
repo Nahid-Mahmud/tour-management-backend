@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 import { catchAsync } from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
-import { authServices } from "./auth.service";
-import envVariables from "../../config/env";
 import { setCookie } from "../../../utils/setCookie";
-import { StatusCodes } from "http-status-codes";
+import envVariables from "../../config/env";
+import { authServices } from "./auth.service";
+import AppError from "../../errorHelpers/AppError";
 
 const credentialLogin = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   //  validate email and password and returns user auth tokens
@@ -66,6 +67,11 @@ const logout = catchAsync(async (req: Request, res: Response, _next: NextFunctio
 
 const resetPassword = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   const decodedToken = req.user;
+
+  if (!decodedToken) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "You are not authorized to perform this action");
+  }
+
   // console.log(decodedToken);
   const { oldPassword, newPassword } = req.body;
 
