@@ -13,6 +13,7 @@ This comprehensive guide walks you through setting up Google OAuth2 authenticati
 7. [Testing the Implementation](#testing-the-implementation)
 8. [Security Considerations](#security-considerations)
 9. [Troubleshooting](#troubleshooting)
+10. [Dynamic Redirect Feature](#dynamic-redirect-feature)
 
 ## Prerequisites
 
@@ -229,19 +230,21 @@ app.use(passport.session());
 
 ### Step 5: Authentication Routes (`src/app/modules/auth/auth.routes.ts`)
 
-Define OAuth routes:
+Define OAuth routes with dynamic redirect support:
 
 ```typescript
-// Initiate Google OAuth
-router.get(
-  "/google",
+// Initiate Google OAuth with optional redirect parameter
+route.get("/google", async (req: Request, res: Response, next: NextFunction) => {
+  const redirect = (req.query.redirect as string) || "/";
   passport.authenticate("google", {
     scope: ["profile", "email"],
-  })
-);
+    // Pass the redirect URL as state to the Google authentication
+    state: redirect,
+  })(req, res, next);
+});
 
 // Handle OAuth callback
-router.get(
+route.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: "/login",
@@ -252,11 +255,22 @@ router.get(
 
 ### Step 6: Authentication Controller (`src/app/modules/auth/auth.controller.ts`)
 
-Handle OAuth callback and token generation:
+Handle OAuth callback with dynamic redirect and token generation:
 
 ```typescript
 const googleCallback = async (req: Request, res: Response) => {
+  let redirectTo = req.query.state ? (req.query.state as string) : "";
+
+  if (redirectTo.startsWith("/")) {
+    // Remove leading slash if present
+    redirectTo = redirectTo.slice(1);
+  }
+
   const user = req.user;
+
+  if (!user) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "User not found");
+  }
 
   // Generate JWT tokens
   const tokenInfo = generateAuthTokens(user);
@@ -267,8 +281,8 @@ const googleCallback = async (req: Request, res: Response) => {
     refreshToken: tokenInfo.refreshToken,
   });
 
-  // Redirect to frontend
-  res.redirect(envVariables.FRONTEND_URL);
+  // Redirect to the frontend URL with the specified path
+  res.redirect(`${envVariables.FRONTEND_URL}/${redirectTo}`);
 };
 ```
 
@@ -277,17 +291,18 @@ const googleCallback = async (req: Request, res: Response) => {
 ### 1. User Initiation
 
 - User clicks "Login with Google" button
-- Frontend redirects to: `GET /api/v1/auth/google`
+- Frontend redirects to: `GET /api/v1/auth/google?redirect=dashboard` (optional redirect parameter)
+- The redirect parameter specifies where to redirect after successful authentication
 
 ### 2. Google Authorization
 
-- Passport redirects user to Google OAuth consent screen
+- Passport redirects user to Google OAuth consent screen with the redirect URL stored as state
 - User grants permissions
-- Google redirects back to callback URL
+- Google redirects back to callback URL with the state parameter preserved
 
 ### 3. Callback Processing
 
-- `GET /api/v1/auth/google/callback` receives authorization code
+- `GET /api/v1/auth/google/callback` receives authorization code and state parameter
 - Passport exchanges code for access token and user profile
 - Strategy function processes user data
 
@@ -303,10 +318,80 @@ const googleCallback = async (req: Request, res: Response) => {
 - Generate JWT refresh token (7 days expiry)
 - Set secure HTTP-only cookies
 
-### 6. Frontend Redirect
+### 6. Dynamic Frontend Redirect
 
-- Redirect user to frontend application
-- Frontend can access user data via authenticated API calls
+- Extract redirect path from OAuth state parameter
+- Redirect user to frontend application with specific path: `${FRONTEND_URL}/${redirectPath}`
+- Frontend can access user data via authenticated API calls with cookies
+
+## Dynamic Redirect Feature
+
+Your implementation includes a sophisticated dynamic redirect system that allows users to be redirected to specific pages after successful Google OAuth authentication.
+
+### How It Works
+
+1. **Frontend Request**: When initiating OAuth, include a `redirect` query parameter:
+
+   ```
+   GET /api/v1/auth/google?redirect=dashboard
+   ```
+
+2. **State Parameter**: The redirect path is passed to Google OAuth as a `state` parameter, which Google preserves and returns in the callback.
+
+3. **Callback Processing**: After successful authentication, the controller extracts the redirect path from the state and redirects to the appropriate frontend route.
+
+### Usage Examples
+
+```javascript
+// Redirect to dashboard after login
+window.location.href = "http://localhost:5000/api/v1/auth/google?redirect=dashboard";
+
+// Redirect to user profile
+window.location.href = "http://localhost:5000/api/v1/auth/google?redirect=profile";
+
+// Redirect to booking page
+window.location.href = "http://localhost:5000/api/v1/auth/google?redirect=bookings/create";
+
+// Default redirect (home page)
+window.location.href = "http://localhost:5000/api/v1/auth/google";
+```
+
+### Implementation Details
+
+The route handler processes the redirect parameter:
+
+```typescript
+route.get("/google", async (req: Request, res: Response, next: NextFunction) => {
+  const redirect = (req.query.redirect as string) || "/";
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    state: redirect, // Google will return this in the callback
+  })(req, res, next);
+});
+```
+
+The callback controller handles the redirect:
+
+```typescript
+const googleCallback = async (req: Request, res: Response) => {
+  let redirectTo = req.query.state ? (req.query.state as string) : "";
+
+  if (redirectTo.startsWith("/")) {
+    redirectTo = redirectTo.slice(1); // Remove leading slash
+  }
+
+  // ... authentication logic ...
+
+  res.redirect(`${envVariables.FRONTEND_URL}/${redirectTo}`);
+};
+```
+
+### Benefits
+
+- **Better UX**: Users return to their intended destination after authentication
+- **Context Preservation**: Maintains user workflow and reduces navigation friction
+- **Flexible Integration**: Easy to implement from any frontend page or component
+- **Secure**: Uses OAuth state parameter, which is a standard security practice
 
 ## Security Features
 
@@ -342,31 +427,58 @@ const cookieOptions = {
 
 ```bash
 pnpm run dev
+# or
+npm run dev
 ```
 
 ### 2. Test OAuth Flow
 
-1. Open browser to: `http://localhost:5000/api/v1/auth/google`
-2. Complete Google OAuth flow
-3. Verify redirect to frontend
-4. Check database for user creation
-5. Verify cookies are set properly
+1. **Test basic OAuth flow**:
 
-### 3. Test API Endpoints
+   - Open browser to: `http://localhost:5000/api/v1/auth/google`
+   - Complete Google OAuth flow
+   - Verify redirect to frontend home page
 
-```bash
-# Test protected route (should work after OAuth)
-curl -b cookies.txt http://localhost:5000/api/v1/protected-route
+2. **Test dynamic redirect**:
 
-# Test token refresh
-curl -X POST -b cookies.txt http://localhost:5000/api/v1/auth/refresh-token
-```
+   - Open browser to: `http://localhost:5000/api/v1/auth/google?redirect=dashboard`
+   - Complete Google OAuth flow
+   - Verify redirect to `${FRONTEND_URL}/dashboard`
 
-### 4. Frontend Integration
+3. **Test different redirect paths**:
+
+   - Try: `http://localhost:5000/api/v1/auth/google?redirect=profile`
+   - Try: `http://localhost:5000/api/v1/auth/google?redirect=bookings/create`
+   - Verify appropriate redirects
+
+4. **Verify authentication state**:
+   - Check database for user creation
+   - Verify cookies are set properly
+   - Test protected routes work after authentication
+
+
+### 3. Frontend Integration
 
 ```javascript
-// Frontend login button
-<button onClick={() => (window.location.href = "http://localhost:5000/api/v1/auth/google")}>Login with Google</button>;
+// Frontend login button with specific redirect
+<button onClick={() => (window.location.href = "http://localhost:5000/api/v1/auth/google?redirect=dashboard")}>
+  Login with Google
+</button>;
+
+// Login button with current page redirect
+const handleGoogleLogin = () => {
+  const currentPath = window.location.pathname.slice(1); // Remove leading slash
+  window.location.href = `http://localhost:5000/api/v1/auth/google?redirect=${currentPath}`;
+};
+
+// Login from different pages
+const loginFromProfile = () => {
+  window.location.href = "http://localhost:5000/api/v1/auth/google?redirect=profile";
+};
+
+const loginFromBookings = () => {
+  window.location.href = "http://localhost:5000/api/v1/auth/google?redirect=bookings";
+};
 
 // Check authentication status
 fetch("http://localhost:5000/api/v1/auth/profile", {
