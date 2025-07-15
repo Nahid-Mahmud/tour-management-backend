@@ -1,3 +1,4 @@
+import bcryptjs from "bcryptjs";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from "passport";
 import { Strategy as GoogleStrategy, Profile, VerifyCallback } from "passport-google-oauth20";
@@ -9,9 +10,39 @@ import { Strategy as LocalStrategy } from "passport-local";
 // email password authentication with passport
 
 passport.use(
-  new LocalStrategy({}, async () => {
-    // Implement your local strategy logic here
-  })
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email: string, password: string, done: VerifyCallback) => {
+      try {
+        // check for email and password has been provided
+        if (!email || !password) {
+          return done(null, false, { message: "Email and password are required" });
+        }
+
+        // check if user exists
+        const user = await User.findOne({ email });
+
+        if (!user) {
+          return done(null, false, { message: "User not found" });
+        }
+
+        const isPasswordMatch = await bcryptjs.compare(password, user.password as string);
+
+        if (!isPasswordMatch) {
+          return done(null, false, { message: "Password is incorrect" });
+        }
+
+        return done(null, user);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error);
+        return done(error);
+      }
+    }
+  )
 );
 
 // Configure Passport to use Google OAuth strategy
