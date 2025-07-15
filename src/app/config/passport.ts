@@ -4,6 +4,17 @@ import { Strategy as GoogleStrategy, Profile, VerifyCallback } from "passport-go
 import envVariables from "./env";
 import User from "../modules/user/user.model";
 import { UserRole } from "../modules/user/user.interface";
+import { Strategy as LocalStrategy } from "passport-local";
+
+// email password authentication with passport
+
+passport.use(
+  new LocalStrategy({}, async () => {
+    // Implement your local strategy logic here
+  })
+);
+
+// Configure Passport to use Google OAuth strategy
 
 passport.use(
   new GoogleStrategy(
@@ -49,9 +60,13 @@ passport.use(
   )
 );
 
+// Serialize and deserialize user instances to support persistent login sessions
+
 passport.serializeUser((user: any, done: (err: any, id?: unknown) => void) => {
   done(null, user._id);
 });
+
+// Deserialize user instance from the session
 
 passport.deserializeUser(async (id: string, done: any) => {
   try {

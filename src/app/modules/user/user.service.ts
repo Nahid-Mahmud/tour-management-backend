@@ -59,13 +59,12 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
   }
 
   // role update validation
-  if (payload.role) {
-    if (decodedToken.role === UserRole.USER || decodedToken.role === UserRole.GUIDE) {
-      throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
-    }
-    if (payload.role === UserRole.SUPER_ADMIN && decodedToken.role === UserRole.ADMIN) {
-      throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
-    }
+
+  if (decodedToken.role === UserRole.USER || decodedToken.role === UserRole.GUIDE) {
+    throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
+  }
+  if (payload.role === UserRole.SUPER_ADMIN && decodedToken.role === UserRole.ADMIN) {
+    throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
   }
 
   // isActive, isDeleted, isVerified update validation
