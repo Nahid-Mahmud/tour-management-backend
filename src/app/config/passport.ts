@@ -4,7 +4,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy, Profile, VerifyCallback } from "passport-google-oauth20";
 import envVariables from "./env";
 import User from "../modules/user/user.model";
-import { UserRole } from "../modules/user/user.interface";
+import { IsActive, UserRole } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";
 
 // email password authentication with passport
@@ -29,7 +29,13 @@ passport.use(
           return done(null, false, { message: "User not found" });
         }
 
-        
+        if (user.isActive === IsActive.BLOCKED || user.isActive === IsActive.INACTIVE) {
+          return done(null, false, { message: `User is ${user.isActive}` });
+        }
+
+        if (user.isDeleted) {
+          return done(null, false, { message: "User is deleted" });
+        }
 
         // check if the users is google authenticated
 
