@@ -83,6 +83,13 @@ const resetPassword = catchAsync(async (req: Request, res: Response, _next: Next
 });
 
 const googleCallback = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  let redirectTo = req.query.state ? (req.query.state as string) : "";
+
+  if (redirectTo.startsWith("/")) {
+    // Remove leading slash if present
+    redirectTo = redirectTo.slice(1);
+  }
+
   const user = req.user;
 
   if (!user) {
@@ -98,7 +105,8 @@ const googleCallback = catchAsync(async (req: Request, res: Response, _next: Nex
     refreshToken: tokenInfo.refreshToken,
   });
 
-  res.redirect(`${envVariables.FRONTEND_URL}`);
+  // Redirect to the frontend URL with the specified path
+  res.redirect(`${envVariables.FRONTEND_URL}/${redirectTo}`);
 });
 
 export const authControllers = {

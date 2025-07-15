@@ -11,8 +11,11 @@ route.post("/refresh-token", authControllers.generateAccessTokensUsingRefreshTok
 route.post("/logout", authControllers.logout);
 route.patch("/reset-password", checkAuth(...Object.values(UserRole)), authControllers.resetPassword);
 route.get("/google", async (req: Request, res: Response, next: NextFunction) => {
+  const redirect = (req.query.redirect as string) || "/";
   passport.authenticate("google", {
     scope: ["profile", "email"],
+    // Pass the redirect URL as state to the Google authentication
+    state: redirect,
   })(req, res, next);
 });
 
