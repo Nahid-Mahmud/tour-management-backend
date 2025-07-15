@@ -10,16 +10,19 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
   let statusCode = 500;
   let message = "Something Went Wrong!!";
 
+  // MongoDB duplicate key error
   if (err.code === 11000) {
-    // MongoDB duplicate key error
     const matchedArray = err.message.match(/"([^"]*)"/);
     statusCode = 409;
     message = `${matchedArray[1]}`;
-  } else if (err.name === "CastError") {
-    // MongoDB Cast Error
+  }
+  // MongoDB Cast Error (objectId Error)
+  else if (err.name === "CastError") {
     statusCode = 400;
     message = `Invalid mongodb ${err.path}: ${err.value}. Please provide a valid id}.`;
-  } else if (err instanceof ZodError) {
+  }
+  // Zod validation error
+  else if (err instanceof ZodError) {
     statusCode = 400;
     message = `Validation Error: ${err.issues.map((issue) => issue.path + ":" + issue.message).join(", ")}`;
     err = err.issues;
