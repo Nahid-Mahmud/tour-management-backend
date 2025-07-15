@@ -15,7 +15,7 @@ passport.use(
       usernameField: "email",
       passwordField: "password",
     },
-    async (email: string, password: string, done: VerifyCallback) => {
+    async (email: string, password: string, done) => {
       try {
         // check for email and password has been provided
         if (!email || !password) {
@@ -29,6 +29,10 @@ passport.use(
           return done(null, false, { message: "User not found" });
         }
 
+        // check if the users is google authenticated 
+
+
+
         const isPasswordMatch = await bcryptjs.compare(password, user.password as string);
 
         if (!isPasswordMatch) {
@@ -39,7 +43,7 @@ passport.use(
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error);
-        return done(error);
+        done(error);
       }
     }
   )
