@@ -6,7 +6,7 @@ import { authControllers } from "./auth.controller";
 
 const route = Router();
 
-route.post("/login", checkAuth(...Object.values(UserRole)), authControllers.credentialLogin);
+route.post("/login", authControllers.credentialLogin);
 route.post("/refresh-token", authControllers.generateAccessTokensUsingRefreshToken);
 route.post("/logout", authControllers.logout);
 route.patch("/reset-password", checkAuth(...Object.values(UserRole)), authControllers.resetPassword);

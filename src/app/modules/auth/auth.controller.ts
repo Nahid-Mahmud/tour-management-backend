@@ -9,23 +9,55 @@ import { authServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
 import { generateAuthTokens } from "../../../utils/userTokens";
 import { JwtPayload } from "jsonwebtoken";
+import passport from "passport";
 
-const credentialLogin = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
-  //  validate email and password and returns user auth tokens
-  const response = await authServices.credentialLogin(req.body);
+const credentialLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  //  validate email and password and returns user auth tokens with custom validation
+  // const response = await authServices.credentialLogin(req.body);
 
-  // set cookies for access and refresh tokens
-  setAuthCookie(res, {
-    accessToken: response.accessToken,
-    refreshToken: response.refreshToken,
-  });
+  // authenticate user with email and password using passport.js
 
-  sendResponse(res, {
-    success: true,
-    message: "User logged in successfully",
-    data: { user: response.user, accessToken: response.accessToken, refreshToken: response.refreshToken },
-    statusCode: 200,
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  passport.authenticate("local", async (error: any, user: any, info: any) => {
+    if (error) {
+      return next(new AppError(StatusCodes.INTERNAL_SERVER_ERROR, info.message || "Internal server error"));
+    }
+
+    if (!user) {
+      return next(new AppError(StatusCodes.UNAUTHORIZED, info.message || "User does not exist"));
+    }
+
+    const authTokens = generateAuthTokens(user);
+
+    const { password, ...userWithoutPassword } = user.toObject();
+
+    // generate access and refresh tokens
+    // set cookies for access and refresh tokens
+    setAuthCookie(res, {
+      accessToken: authTokens.accessToken,
+      refreshToken: authTokens.refreshToken,
+    });
+
+    sendResponse(res, {
+      success: true,
+      message: "User logged in successfully",
+      data: { user: userWithoutPassword, accessToken: authTokens.accessToken, refreshToken: authTokens.refreshToken },
+      statusCode: 200,
+    });
+  })(req, res, next);
+
+  // // set cookies for access and refresh tokens
+  // setAuthCookie(res, {
+  //   accessToken: response.accessToken,
+  //   refreshToken: response.refreshToken,
+  // });
+
+  // sendResponse(res, {
+  //   success: true,
+  //   message: "User logged in successfully",
+  //   data: { user: response.user, accessToken: response.accessToken, refreshToken: response.refreshToken },
+  //   statusCode: 200,
+  // });
 });
 
 const generateAccessTokensUsingRefreshToken = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {

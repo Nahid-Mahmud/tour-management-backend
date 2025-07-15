@@ -53,8 +53,8 @@ const credentialLogin = async (payload: { email: string; password: string }) => 
   const { password: userPassword, ...userWithoutPassword } = user.toObject();
 
   return {
-    accessToken: userAuthTokens.accessToken,
     user: userWithoutPassword,
+    accessToken: userAuthTokens.accessToken,
     refreshToken: userAuthTokens.refreshToken,
   };
 };

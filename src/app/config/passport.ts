@@ -29,9 +29,15 @@ passport.use(
           return done(null, false, { message: "User not found" });
         }
 
-        // check if the users is google authenticated 
+        
 
+        // check if the users is google authenticated
 
+        const isGoogleAuthenticated = user.auths.some((providerObjects) => providerObjects.provider === "google");
+
+        if (isGoogleAuthenticated && !user.password) {
+          return done(null, false, { message: "This user is authenticated with Google. Please use Google login." });
+        }
 
         const isPasswordMatch = await bcryptjs.compare(password, user.password as string);
 
