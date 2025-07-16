@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import envVariables from "../app/config/env";
-import { IAuthProvider, IUser, UserRole } from "../app/modules/user/user.interface";
-import User from "../app/modules/user/user.model";
+import envVariables from "../config/env";
+import { IAuthProvider, IUser, UserRole } from "../modules/user/user.interface";
+import User from "../modules/user/user.model";
 import { hashPassword } from "./hashPassword";
 
 export const seedSuperAdmin = async () => {

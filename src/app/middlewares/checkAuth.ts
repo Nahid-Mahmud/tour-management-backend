@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { verifyToken } from "../../utils/jwt";
+import { verifyToken } from "../utils/jwt";
 import envVariables from "../config/env";
 import AppError from "../errorHelpers/AppError";
 import { IsActive, UserRole } from "../modules/user/user.interface";

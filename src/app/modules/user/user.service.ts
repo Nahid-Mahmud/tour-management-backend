@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
-import { hashPassword } from "../../../utils/hashPassword";
+import { hashPassword } from "../../utils/hashPassword";
 import AppError from "../../errorHelpers/AppError";
 import { IAuthProvider, IUser, UserRole } from "./user.interface";
 import User from "./user.model";

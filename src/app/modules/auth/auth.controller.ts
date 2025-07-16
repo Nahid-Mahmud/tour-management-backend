@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { catchAsync } from "../../../utils/catchAsync";
-import sendResponse from "../../../utils/sendResponse";
-import { setAuthCookie } from "../../../utils/setAuthCookie";
+import { catchAsync } from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import { setAuthCookie } from "../../utils/setAuthCookie";
 import envVariables from "../../config/env";
 import { authServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
-import { generateAuthTokens } from "../../../utils/userTokens";
+import { generateAuthTokens } from "../../utils/userTokens";
 import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 

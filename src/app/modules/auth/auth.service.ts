@@ -1,7 +1,7 @@
 import bcryptjs from "bcryptjs";
 import { StatusCodes } from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
-import { createNewRefreshToken, generateAuthTokens } from "../../../utils/userTokens";
+import { createNewRefreshToken, generateAuthTokens } from "../../utils/userTokens";
 import envVariables from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import User from "../user/user.model";
