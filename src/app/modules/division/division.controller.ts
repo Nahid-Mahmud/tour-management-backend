@@ -26,7 +26,20 @@ const getAllDivisions = catchAsync(async (req: Request, res: Response, next: Nex
   });
 });
 
+const updateDivision = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  const division = req.body;
+  const result = await DivisionService.updateDivision(id, division);
+  sendResponse(res, {
+    success: true,
+    message: "Division updated successfully",
+    data: result,
+    statusCode: StatusCodes.OK,
+  });
+});
+
 export const divisionControllers = {
   createDivision,
   getAllDivisions,
+  updateDivision,
 };
