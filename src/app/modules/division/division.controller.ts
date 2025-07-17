@@ -5,6 +5,7 @@ import { DivisionService } from "./division.service";
 import sendResponse from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
 
+// Function to create a new division
 const createDivision = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const division = req.body;
   const result = await DivisionService.createDivision(division);
@@ -16,6 +17,7 @@ const createDivision = catchAsync(async (req: Request, res: Response, next: Next
   });
 });
 
+// Function to get all divisions
 const getAllDivisions = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const result = await DivisionService.getAllDivisions();
   sendResponse(res, {
@@ -26,6 +28,7 @@ const getAllDivisions = catchAsync(async (req: Request, res: Response, next: Nex
   });
 });
 
+// Function to update a division by ID
 const updateDivision = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const division = req.body;
@@ -38,8 +41,22 @@ const updateDivision = catchAsync(async (req: Request, res: Response, next: Next
   });
 });
 
+// Function to delete a division by ID
+const deleteDivision = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  await DivisionService.deleteDivision(id);
+
+  sendResponse(res, {
+    success: true,
+    message: "Division deleted successfully",
+    statusCode: StatusCodes.OK,
+    data: null,
+  });
+});
+
 export const divisionControllers = {
   createDivision,
   getAllDivisions,
   updateDivision,
+  deleteDivision,
 };
