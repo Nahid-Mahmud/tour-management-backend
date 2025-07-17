@@ -3,7 +3,7 @@ import { checkAuth } from "../../middlewares/checkAuth";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { UserRole } from "../user/user.interface";
 import { divisionControllers } from "./division.controller";
-import { createDivisionSchema, updateDivisionSchema } from "./division.validaion";
+import { createDivisionSchema, updateDivisionSchema } from "./division.validation";
 
 const router = Router();
 
@@ -21,5 +21,7 @@ router.patch(
   validateRequest(updateDivisionSchema),
   divisionControllers.updateDivision
 );
+
+router.delete("/:id", checkAuth(UserRole.SUPER_ADMIN, UserRole.ADMIN), divisionControllers.deleteDivision);
 
 export const divisionRoutes = router;
