@@ -5,6 +5,12 @@ import { UserRole } from "../user/user.interface";
 
 const router = Router();
 
-router.post("/create", checkAuth(UserRole.SUPER_ADMIN, UserRole.ADMIN), divisionControllers.createDivision);
+router.get("/", divisionControllers.getAllDivisions);
+router.post(
+  "/create",
+  checkAuth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  // validateRequest(),
+  divisionControllers.createDivision
+);
 
 export const divisionRoutes = router;

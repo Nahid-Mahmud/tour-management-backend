@@ -6,6 +6,14 @@ const createDivision = async (division: IDivision) => {
   return res;
 };
 
+const getAllDivisions = async () => {
+  const res = await Division.find({});
+  // eslint-disable-next-line no-console
+  console.log(res);
+  return res;
+};
+
 export const DivisionService = {
   createDivision,
+  getAllDivisions,
 };
