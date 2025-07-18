@@ -1,3 +1,6 @@
+import { StatusCodes } from "http-status-codes";
+import AppError from "../../errorHelpers/AppError";
+import { Division } from "../division/division.model";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
@@ -10,7 +13,7 @@ const createTourType = async (tourType: ITourType) => {
 
   // If it exists, throw an error to prevent duplicates
   if (existingTourType) {
-    throw new Error(`Tour type with name "${tourType.name}" already exists.`);
+    throw new AppError(StatusCodes.CONFLICT, `Tour type with name "${tourType.name}" already exists.`);
   }
 
   // If it doesn't exist, create a new tour type
@@ -27,7 +30,7 @@ const editTourType = async (id: string, tourType: ITourType) => {
 
   // If it exists, throw an error to prevent duplicates
   if (existingTourType) {
-    throw new Error(`Tour type with name "${tourType.name}" already exists.`);
+    throw new AppError(StatusCodes.CONFLICT, `Tour type with name "${tourType.name}" already exists.`);
   }
 
   // If it doesn't exist, update the tour type
@@ -49,7 +52,7 @@ const deleteTourType = async (id: string) => {
   // Check if the tour type exists
   const existingTourType = await TourType.findById(id);
   if (!existingTourType) {
-    throw new Error(`Tour type with ID "${id}" does not exist.`);
+    throw new AppError(StatusCodes.NOT_FOUND, `Tour type with ID "${id}" does not exist.`);
   }
   // If it exists, delete the tour type
   await TourType.findByIdAndDelete(id);
@@ -59,6 +62,21 @@ const deleteTourType = async (id: string) => {
 //---------------------------Tour---------------------------//
 
 const createTour = async (tourData: Partial<ITour>) => {
+  const { division, tourType } = tourData;
+
+  // check if division exists
+  const existingDivision = await Division.findById(division);
+  if (!existingDivision) {
+    throw new AppError(StatusCodes.NOT_FOUND, `Division with ID "${division}" does not exist.`);
+  }
+
+  // check if tour type exists
+  const existingTourType = await TourType.findById(tourType);
+
+  if (!existingTourType) {
+    throw new AppError(StatusCodes.NOT_FOUND, `Tour type with ID "${tourType}" does not exist.`);
+  }
+
   const tour = await Tour.create(tourData);
   return tour;
 };
@@ -72,6 +90,11 @@ const editTour = async (id: string, tourData: Partial<ITour>) => {
   return updatedTour;
 };
 
+const getAllTours = async () => {
+  const tours = await Tour.find().populate("division").populate("tourType");
+  return tours;
+};
+
 export const TourService = {
   createTourType,
   editTourType,
@@ -79,4 +102,5 @@ export const TourService = {
   deleteTourType,
   createTour,
   editTour,
+  getAllTours,
 };
