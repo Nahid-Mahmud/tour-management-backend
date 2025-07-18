@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import AppError from "../../errorHelpers/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { ITour, ITourType } from "./tour.interface";
 import { TourService } from "./tour.service";
-import AppError from "../../errorHelpers/AppError";
 
 // ---------------------------- Tour Type ---------------------------- //
 
@@ -84,6 +84,28 @@ const getAllTours = catchAsync(async (req: Request, res: Response, next: NextFun
   });
 });
 
+const updateTour = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  const tourData: Partial<ITour> = req.body;
+
+  if (!id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Tour ID is required");
+  }
+
+  const { division, tourType } = tourData;
+  if (!division || !tourType) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Division and Tour Type are required");
+  }
+
+  const updatedTour = await TourService.updateTour(id, tourData);
+  sendResponse(res, {
+    success: true,
+    message: "Tour updated successfully",
+    data: updatedTour,
+    statusCode: StatusCodes.OK,
+  });
+});
+
 export const TourController = {
   createTourType,
   editTourType,
@@ -91,4 +113,5 @@ export const TourController = {
   deleteTourType,
   createTour,
   getAllTours,
+  updateTour,
 };

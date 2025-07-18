@@ -1,9 +1,14 @@
 import { Router } from "express";
-import { TourController } from "./tour.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
-import { UserRole } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { createTourTypeZodSchema, createTourZodSchema, updateTourZodSchema } from "./tour.validation";
+import { UserRole } from "../user/user.interface";
+import { TourController } from "./tour.controller";
+import {
+  createTourTypeZodSchema,
+  createTourZodSchema,
+  updateTourTypeZodSchema,
+  updateTourZodSchema,
+} from "./tour.validation";
 
 const router = Router();
 
@@ -16,7 +21,7 @@ router.post(
 );
 router.patch(
   "/tour-types/:id",
-  validateRequest(updateTourZodSchema),
+  validateRequest(updateTourTypeZodSchema),
   checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   TourController.editTourType
 );
@@ -31,5 +36,12 @@ router.post(
 );
 
 router.get("/", checkAuth(...Object.values(UserRole)), TourController.getAllTours);
+
+router.patch(
+  "/:id",
+  validateRequest(updateTourZodSchema),
+  checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  TourController.updateTour
+);
 
 export const TourRoutes = router;

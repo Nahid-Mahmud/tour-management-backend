@@ -95,6 +95,31 @@ const getAllTours = async () => {
   return tours;
 };
 
+const updateTour = async (id: string, tourData: Partial<ITour>) => {
+  const existingTour = await Tour.findById(id);
+
+  const { division, tourType } = tourData;
+  if (division) {
+    const existingDivision = await Division.findById(division);
+    if (!existingDivision) {
+      throw new AppError(StatusCodes.NOT_FOUND, `Division with ID "${division}" does not exist.`);
+    }
+  }
+
+  if (tourType) {
+    const existingTourType = await TourType.findById(tourType);
+    if (!existingTourType) {
+      throw new AppError(StatusCodes.NOT_FOUND, `Tour type with ID "${tourType}" does not exist.`);
+    }
+  }
+
+  if (!existingTour) {
+    throw new AppError(StatusCodes.NOT_FOUND, `Tour with ID "${id}" does not exist.`);
+  }
+  const updatedTour = await Tour.findByIdAndUpdate(id, tourData, { new: true, runValidators: true });
+  return updatedTour;
+};
+
 export const TourService = {
   createTourType,
   editTourType,
@@ -103,4 +128,5 @@ export const TourService = {
   createTour,
   editTour,
   getAllTours,
+  updateTour,
 };
