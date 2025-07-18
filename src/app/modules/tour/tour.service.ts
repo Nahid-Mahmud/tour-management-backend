@@ -1,5 +1,5 @@
-import { ITourType } from "./tour.interface";
-import { TourType } from "./tour.model";
+import { ITour, ITourType } from "./tour.interface";
+import { Tour, TourType } from "./tour.model";
 
 // ---------------------------- Tour Type ---------------------------- //
 
@@ -56,9 +56,27 @@ const deleteTourType = async (id: string) => {
   return null;
 };
 
+//---------------------------Tour---------------------------//
+
+const createTour = async (tourData: Partial<ITour>) => {
+  const tour = await Tour.create(tourData);
+  return tour;
+};
+
+const editTour = async (id: string, tourData: Partial<ITour>) => {
+  const existingTour = await Tour.findById(id);
+  if (!existingTour) {
+    throw new Error(`Tour with ID "${id}" does not exist.`);
+  }
+  const updatedTour = await Tour.findByIdAndUpdate(id, tourData, { new: true, runValidators: true });
+  return updatedTour;
+};
+
 export const TourService = {
   createTourType,
   editTourType,
   getAllTourTypes,
   deleteTourType,
+  createTour,
+  editTour,
 };
