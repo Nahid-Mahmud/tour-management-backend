@@ -1,0 +1,63 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+import { catchAsync } from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import { ITourType } from "./tour.interface";
+import { TourService } from "./tour.service";
+
+// ---------------------------- Tour Type ---------------------------- //
+
+// Function to create a new tour type
+const createTourType = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const tourType: ITourType = req.body;
+  const createdTourType = await TourService.createTourType(tourType);
+  sendResponse(res, {
+    success: true,
+    message: "Tour type created successfully",
+    data: createdTourType,
+    statusCode: StatusCodes.CREATED,
+  });
+});
+
+// Function to edit a tour type
+const editTourType = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  const tourType: ITourType = req.body;
+  const updatedTourType = await TourService.editTourType(id, tourType);
+  sendResponse(res, {
+    success: true,
+    message: "Tour type updated successfully",
+    data: updatedTourType,
+    statusCode: StatusCodes.OK,
+  });
+});
+
+// Function to get all tour types
+const getAllTourTypes = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const tourTypes = await TourService.getAllTourTypes();
+  sendResponse(res, {
+    success: true,
+    message: "Tour types fetched successfully",
+    data: tourTypes,
+    statusCode: StatusCodes.OK,
+  });
+});
+
+const deleteTourType = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  await TourService.deleteTourType(id);
+  sendResponse(res, {
+    success: true,
+    message: "Tour type deleted successfully",
+    statusCode: StatusCodes.NO_CONTENT,
+    data: null,
+  });
+});
+
+export const TourController = {
+  createTourType,
+  editTourType,
+  getAllTourTypes,
+  deleteTourType,
+};
