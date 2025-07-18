@@ -33,6 +33,18 @@ const updateDivision = async (id: string, division: Partial<IDivision>) => {
   if (!existingDivision) {
     throw new AppError(StatusCodes.NOT_FOUND, "Division not found");
   }
+
+  // Duplicate name check
+
+  const duplicateDivision = await Division.findOne({
+    name: division.name,
+    _id: { $ne: id },
+  });
+
+  if (duplicateDivision) {
+    throw new AppError(StatusCodes.CONFLICT, "Division with this name already exists");
+  }
+
   if (division.name) {
     division.slug = createSlug(division.name);
   }
