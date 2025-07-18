@@ -44,4 +44,10 @@ router.patch(
   TourController.updateTour
 );
 
+router.delete(
+  "/:id",
+  checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.USER, UserRole.GUIDE),
+  TourController.deleteTour
+);
+
 export const TourRoutes = router;
