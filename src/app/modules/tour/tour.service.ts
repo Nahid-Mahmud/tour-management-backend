@@ -120,6 +120,15 @@ const updateTour = async (id: string, tourData: Partial<ITour>) => {
   return updatedTour;
 };
 
+const deleteTour = async (id: string) => {
+  const existingTour = await Tour.findById(id);
+  if (!existingTour) {
+    throw new AppError(StatusCodes.NOT_FOUND, `Tour with ID "${id}" does not exist.`);
+  }
+  await Tour.findByIdAndDelete(id);
+  return null;
+};
+
 export const TourService = {
   createTourType,
   editTourType,
@@ -129,4 +138,5 @@ export const TourService = {
   editTour,
   getAllTours,
   updateTour,
+  deleteTour,
 };
