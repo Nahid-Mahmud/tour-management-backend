@@ -3,8 +3,9 @@ import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { ITourType } from "./tour.interface";
+import { ITour, ITourType } from "./tour.interface";
 import { TourService } from "./tour.service";
+import AppError from "../../errorHelpers/AppError";
 
 // ---------------------------- Tour Type ---------------------------- //
 
@@ -53,6 +54,26 @@ const deleteTourType = catchAsync(async (req: Request, res: Response, next: Next
     statusCode: StatusCodes.OK,
     data: null,
   });
+});
+
+// ---------------------------- Tour----------------------------- //
+
+const createTour = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const tourData: Partial<ITour> = req.body;
+  const { division, tourType } = tourData;
+  if (!division || !tourType) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Division and Tour Type are required");
+  }
+
+  const createdTour = await TourService.createTour(tourData);
+  sendResponse(res, {
+    success: true,
+    message: "Tour created successfully",
+    data: createdTour,
+    statusCode: StatusCodes.CREATED,
+  });
+
+  
 });
 
 export const TourController = {
