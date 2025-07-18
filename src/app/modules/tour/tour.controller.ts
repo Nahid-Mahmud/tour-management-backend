@@ -50,7 +50,7 @@ const deleteTourType = catchAsync(async (req: Request, res: Response, next: Next
   sendResponse(res, {
     success: true,
     message: "Tour type deleted successfully",
-    statusCode: StatusCodes.NO_CONTENT,
+    statusCode: StatusCodes.OK,
     data: null,
   });
 });
