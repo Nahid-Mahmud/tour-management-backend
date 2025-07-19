@@ -93,7 +93,8 @@ const editTour = async (id: string, tourData: Partial<ITour>) => {
 
 const getAllTours = async () => {
   const tours = await Tour.find().populate("division").populate("tourType");
-  return tours;
+  const totalTours = await Tour.countDocuments();
+  return { tours, totalTours };
 };
 
 const updateTour = async (id: string, tourData: Partial<ITour>) => {
