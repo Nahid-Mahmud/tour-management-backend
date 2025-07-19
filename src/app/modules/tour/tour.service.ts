@@ -84,9 +84,9 @@ const createTour = async (tourData: Partial<ITour>) => {
 const editTour = async (id: string, tourData: Partial<ITour>) => {
   const existingTour = await Tour.findById(id);
   if (!existingTour) {
-    throw new Error(`Tour with ID "${id}" does not exist.`);
+    throw new AppError(StatusCodes.NOT_FOUND, `Tour with ID "${id}" does not exist.`);
   }
-  const updatedTour = await Tour.findByIdAndUpdate(id, tourData, { new: true, runValidators: true });
+  const updatedTour = await Tour.findOneAndUpdate({ _id: id }, tourData, { new: true, runValidators: true });
   return updatedTour;
 };
 

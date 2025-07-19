@@ -1,6 +1,7 @@
 import z from "zod";
 
 export const createTourZodSchema = z.object({
+  title: z.string(),
   slug: z.string().min(1, "Slug is required").max(100, "Slug must be less than 100 characters"),
   description: z.string().optional(),
   images: z.array(z.string()).optional(),
@@ -19,6 +20,7 @@ export const createTourZodSchema = z.object({
 });
 
 export const updateTourZodSchema = z.object({
+  title: z.string().optional(),
   slug: z.string().min(1, "Slug is required").max(100, "Slug must be less than 100 characters").optional(),
   description: z.string().optional(),
   images: z.array(z.string()).optional(),
