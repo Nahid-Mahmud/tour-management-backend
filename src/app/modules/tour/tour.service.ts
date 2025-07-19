@@ -77,7 +77,8 @@ const createTour = async (tourData: Partial<ITour>) => {
     throw new AppError(StatusCodes.NOT_FOUND, `Tour type with ID "${tourType}" does not exist.`);
   }
 
-  const tour = await Tour.create(tourData);
+  const newTour = new Tour(tourData);
+  const tour = await newTour.save();
   return tour;
 };
 
