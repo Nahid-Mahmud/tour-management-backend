@@ -2,20 +2,17 @@ import { StatusCodes } from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
 import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
-import createSlug from "../../utils/createSlug";
 
 // Function to create a new division
-const createDivision = async (division: IDivision) => {
-  const existingDivision = await Division.findOne({ name: division.name });
-
+const createDivision = async (payload: IDivision) => {
+  const existingDivision = await Division.findOne({ name: payload.name });
   if (existingDivision) {
-    throw new AppError(StatusCodes.CONFLICT, "Division with this name already exists");
+    throw new Error("A division with this name already exists.");
   }
 
-  // create a slug from the division name
-  division.slug = createSlug(division.name);
-  const res = await Division.create(division);
-  return res;
+  const division = await Division.create(payload);
+
+  return division;
 };
 
 // Function to get all divisions
@@ -27,34 +24,24 @@ const getAllDivisions = async () => {
 };
 
 // Function to update a division by ID
-const updateDivision = async (id: string, division: Partial<IDivision>) => {
+const updateDivision = async (id: string, payload: Partial<IDivision>) => {
   const existingDivision = await Division.findById(id);
-
   if (!existingDivision) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Division not found");
+    throw new Error("Division not found.");
   }
 
-  // Duplicate name check
-
   const duplicateDivision = await Division.findOne({
-    name: division.name,
+    name: payload.name,
     _id: { $ne: id },
   });
 
   if (duplicateDivision) {
-    throw new AppError(StatusCodes.CONFLICT, "Division with this name already exists");
+    throw new Error("A division with this name already exists.");
   }
 
-  if (division.name) {
-    division.slug = createSlug(division.name);
-  }
+  const updatedDivision = await Division.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
 
-  const res = await Division.findByIdAndUpdate(id, division, {
-    new: true,
-    runValidators: true,
-  });
-
-  return res;
+  return updatedDivision;
 };
 
 // function to delete a division by ID
