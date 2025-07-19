@@ -91,8 +91,10 @@ const editTour = async (id: string, tourData: Partial<ITour>) => {
   return updatedTour;
 };
 
-const getAllTours = async () => {
-  const tours = await Tour.find().populate("division").populate("tourType");
+const getAllTours = async (query: Record<string, string>) => {
+  const filter = query;
+
+  const tours = await Tour.find(filter).populate("division").populate("tourType");
   const totalTours = await Tour.countDocuments();
   return { tours, totalTours };
 };
