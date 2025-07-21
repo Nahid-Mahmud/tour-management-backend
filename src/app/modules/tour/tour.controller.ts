@@ -81,9 +81,7 @@ const getAllTours = catchAsync(async (req: Request, res: Response, next: NextFun
     success: true,
     message: "Tours fetched successfully",
     data: tours.tours,
-    meta: {
-      total: tours.totalTours,
-    },
+    meta: tours.meta,
     statusCode: StatusCodes.OK,
   });
 });

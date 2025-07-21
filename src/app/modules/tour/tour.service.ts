@@ -95,9 +95,22 @@ const editTour = async (id: string, tourData: Partial<ITour>) => {
 
 // get all tours with optional query parameters for filtering
 const getAllTours = async (query: Record<string, string>) => {
+  // specific fields to have in the filter
   const filter = query;
-  const searchTerm = filter.searchTerm || "";
-  const sort = query.sort || "-createdAt";
+  //  search to broad Searchable fields
+  const searchTerm = filter?.searchTerm || "";
+  //  sort by createdAt by default or by the provided sort query
+  const sort = query?.sort || "-createdAt";
+
+  // fields to select in the response
+  const fields = query.fields?.split(",").join(" ") || "";
+
+  // page and limit for pagination
+  const page = query.page ? parseInt(query.page, 10) : 1;
+  const limit = query.limit ? parseInt(query.limit, 10) : 10;
+
+  // Calculate the skip value for pagination
+  const skip = (page - 1) * limit;
 
   for (const field of excludeFields) {
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
@@ -108,11 +121,26 @@ const getAllTours = async (query: Record<string, string>) => {
     $or: tourSearchableFields.map((field: string) => ({ [field]: { $regex: searchTerm, $options: "i" } })),
   };
 
-  const tours = await Tour.find(searchQuery).find(filter).sort(sort);
-  // .populate("division")
-  // .populate("tourType");
-  const totalTours = tours.length;
-  return { tours, totalTours };
+  // fist pattern to get all data
+  // const tours = await Tour.find(searchQuery).find(filter).sort(sort).select(fields).skip(skip).limit(limit);
+
+  // second  pattern to get all data with pagination
+
+  const filterQuery = Tour.find(filter);
+  const toursWithSearchQuery = filterQuery.find(searchQuery);
+  const tours = await toursWithSearchQuery.sort(sort).select(fields).skip(skip).limit(limit);
+
+  const totalDocument = await Tour.countDocuments();
+  const totalPages = Math.ceil(totalDocument / limit);
+
+  const meta = {
+    page,
+    limit,
+    total: totalDocument,
+    totalPages,
+  };
+
+  return { tours, meta };
 };
 
 const updateTour = async (id: string, tourData: Partial<ITour>) => {
