@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
+import { excludeFields } from "../../constants";
 import AppError from "../../errorHelpers/AppError";
 import { Division } from "../division/division.model";
+import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
@@ -91,11 +93,25 @@ const editTour = async (id: string, tourData: Partial<ITour>) => {
   return updatedTour;
 };
 
+// get all tours with optional query parameters for filtering
 const getAllTours = async (query: Record<string, string>) => {
   const filter = query;
+  const searchTerm = filter.searchTerm || "";
+  const sort = query.sort || "-createdAt";
 
-  const tours = await Tour.find(filter).populate("division").populate("tourType");
-  const totalTours = await Tour.countDocuments();
+  for (const field of excludeFields) {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete filter[field];
+  }
+
+  const searchQuery = {
+    $or: tourSearchableFields.map((field: string) => ({ [field]: { $regex: searchTerm, $options: "i" } })),
+  };
+
+  const tours = await Tour.find(searchQuery).find(filter).sort(sort);
+  // .populate("division")
+  // .populate("tourType");
+  const totalTours = tours.length;
   return { tours, totalTours };
 };
 
