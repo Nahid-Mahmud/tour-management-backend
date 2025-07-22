@@ -147,7 +147,15 @@ const editTour = async (id: string, tourData: Partial<ITour>) => {
 const getAllTours = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Tour.find(), query);
 
-  const tours = await queryBuilder.filter().search(tourSearchableFields).modelQuery;
+  // optimum order of method calls
+  // 1. filter
+  // 2. search
+  // 3. sort
+  // 4. fields
+  // 5. paginate
+  // 6. build the query
+
+  const tours = await queryBuilder.filter().search(tourSearchableFields).sort().fields().paginate().build();
 
   // const totalDocument = await Tour.countDocuments();
   // const totalPages = Math.ceil(totalDocument / limit);

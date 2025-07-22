@@ -26,4 +26,29 @@ export class QueryBuilder<T> {
     this.modelQuery = this.modelQuery.find(searchQuery);
     return this;
   }
+  sort(): this {
+    const sort = this.query?.sort || "-createdAt";
+    this.modelQuery = this.modelQuery.sort(sort);
+    return this;
+  }
+
+  fields(): this {
+    const fields = this.query.fields?.split(",").join(" ") || "";
+    this.modelQuery = this.modelQuery.select(fields);
+    return this;
+  }
+
+  paginate(): this {
+    const page = parseInt(this.query.page, 10) || 1;
+    const limit = parseInt(this.query.limit, 10) || 10;
+
+    //   // Calculate the skip value for pagination
+    const skip = (page - 1) * limit;
+
+    this.modelQuery = this.modelQuery.skip(skip).limit(limit);
+    return this;
+  }
+  build(): Query<T[], T> {
+    return this.modelQuery;
+  }
 }
