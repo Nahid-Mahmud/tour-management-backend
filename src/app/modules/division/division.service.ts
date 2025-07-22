@@ -54,9 +54,19 @@ const deleteDivision = async (id: string) => {
   return null;
 };
 
+// Function to get a division by slug
+const getDivisionBySlug = async (slug: string) => {
+  const division = await Division.findOne({ slug });
+  if (!division) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Division not found");
+  }
+  return division;
+};
+
 export const DivisionService = {
   createDivision,
   getAllDivisions,
   updateDivision,
   deleteDivision,
+  getDivisionBySlug,
 };
