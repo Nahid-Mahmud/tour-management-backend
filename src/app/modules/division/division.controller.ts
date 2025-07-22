@@ -54,9 +54,22 @@ const deleteDivision = catchAsync(async (req: Request, res: Response, next: Next
   });
 });
 
+// Function to get a division by slug
+const getDivisionBySlug = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { slug } = req.params;
+  const result = await DivisionService.getDivisionBySlug(slug);
+  sendResponse(res, {
+    success: true,
+    message: "Division retrieved successfully",
+    data: result,
+    statusCode: StatusCodes.OK,
+  });
+});
+
 export const divisionControllers = {
   createDivision,
   getAllDivisions,
   updateDivision,
   deleteDivision,
+  getDivisionBySlug,
 };
