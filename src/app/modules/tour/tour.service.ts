@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { excludeFields } from "../../constants";
 import AppError from "../../errorHelpers/AppError";
+import { QueryBuilder } from "../../utils/queryBuilder";
 import { Division } from "../division/division.model";
 import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
@@ -93,54 +93,76 @@ const editTour = async (id: string, tourData: Partial<ITour>) => {
   return updatedTour;
 };
 
+// // get all tours with optional query parameters for filtering
+// const getAllTours = async (query: Record<string, string>) => {
+//   // specific fields to have in the filter
+//   const filter = query;
+//   //  search to broad Searchable fields
+//   const searchTerm = filter?.searchTerm || "";
+//   //  sort by createdAt by default or by the provided sort query
+//   const sort = query?.sort || "-createdAt";
+
+//   // fields to select in the response
+//   const fields = query.fields?.split(",").join(" ") || "";
+
+//   // page and limit for pagination
+//   const page = query.page ? parseInt(query.page, 10) : 1;
+//   const limit = query.limit ? parseInt(query.limit, 10) : 10;
+
+//   // Calculate the skip value for pagination
+//   const skip = (page - 1) * limit;
+
+//   for (const field of excludeFields) {
+//     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+//     delete filter[field];
+//   }
+
+//   const searchQuery = {
+//     $or: tourSearchableFields.map((field: string) => ({ [field]: { $regex: searchTerm, $options: "i" } })),
+//   };
+
+//   // fist pattern to get all data
+//   // const tours = await Tour.find(searchQuery).find(filter).sort(sort).select(fields).skip(skip).limit(limit);
+
+//   // second  pattern to get all data with pagination
+
+//   const filterQuery = Tour.find(filter);
+//   const toursWithSearchQuery = filterQuery.find(searchQuery);
+//   const tours = await toursWithSearchQuery.sort(sort).select(fields).skip(skip).limit(limit);
+
+//   const totalDocument = await Tour.countDocuments();
+//   const totalPages = Math.ceil(totalDocument / limit);
+
+//   const meta = {
+//     page,
+//     limit,
+//     total: totalDocument,
+//     totalPages,
+//   };
+
+//   return { tours, meta };
+// };
+
 // get all tours with optional query parameters for filtering
 const getAllTours = async (query: Record<string, string>) => {
-  // specific fields to have in the filter
-  const filter = query;
-  //  search to broad Searchable fields
-  const searchTerm = filter?.searchTerm || "";
-  //  sort by createdAt by default or by the provided sort query
-  const sort = query?.sort || "-createdAt";
+  const queryBuilder = new QueryBuilder(Tour.find(), query);
 
-  // fields to select in the response
-  const fields = query.fields?.split(",").join(" ") || "";
+  const tours = await queryBuilder.filter().search(tourSearchableFields).modelQuery;
 
-  // page and limit for pagination
-  const page = query.page ? parseInt(query.page, 10) : 1;
-  const limit = query.limit ? parseInt(query.limit, 10) : 10;
+  // const totalDocument = await Tour.countDocuments();
+  // const totalPages = Math.ceil(totalDocument / limit);
 
-  // Calculate the skip value for pagination
-  const skip = (page - 1) * limit;
+  // const meta = {
+  //   page,
+  //   limit,
+  //   total: totalDocument,
+  //   totalPages,
+  // };
 
-  for (const field of excludeFields) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete filter[field];
-  }
-
-  const searchQuery = {
-    $or: tourSearchableFields.map((field: string) => ({ [field]: { $regex: searchTerm, $options: "i" } })),
+  return {
+    tours,
+    // meta };
   };
-
-  // fist pattern to get all data
-  // const tours = await Tour.find(searchQuery).find(filter).sort(sort).select(fields).skip(skip).limit(limit);
-
-  // second  pattern to get all data with pagination
-
-  const filterQuery = Tour.find(filter);
-  const toursWithSearchQuery = filterQuery.find(searchQuery);
-  const tours = await toursWithSearchQuery.sort(sort).select(fields).skip(skip).limit(limit);
-
-  const totalDocument = await Tour.countDocuments();
-  const totalPages = Math.ceil(totalDocument / limit);
-
-  const meta = {
-    page,
-    limit,
-    total: totalDocument,
-    totalPages,
-  };
-
-  return { tours, meta };
 };
 
 const updateTour = async (id: string, tourData: Partial<ITour>) => {
