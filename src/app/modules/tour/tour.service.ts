@@ -155,21 +155,20 @@ const getAllTours = async (query: Record<string, string>) => {
   // 5. paginate
   // 6. build the query
 
+  // 1st pattern to get all data and meta data
+  /*
   const tours = await queryBuilder.filter().search(tourSearchableFields).sort().fields().paginate().build();
+  const meta = await queryBuilder.getMeta();
+  */
 
-  // const totalDocument = await Tour.countDocuments();
-  // const totalPages = Math.ceil(totalDocument / limit);
+  // 2nd pattern to get all data and meta data
 
-  // const meta = {
-  //   page,
-  //   limit,
-  //   total: totalDocument,
-  //   totalPages,
-  // };
+  const tours = queryBuilder.filter().search(tourSearchableFields).sort().fields().paginate();
+  const [data, meta] = await Promise.all([tours.build(), queryBuilder.getMeta()]);
 
   return {
-    tours,
-    // meta };
+    tours: data,
+    meta,
   };
 };
 
