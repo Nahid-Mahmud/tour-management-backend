@@ -2,6 +2,6 @@ import { Router } from "express";
 
 const router = Router();
 
-const BookingRoute = router;
+const bookingRoute = router;
 
-export default BookingRoute;
+export default bookingRoute;

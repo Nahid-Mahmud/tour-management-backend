@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { authRoutes } from "../modules/auth/auth.routes";
-import BookingRoute from "../modules/booking/booking.route";
+import bookingRoute from "../modules/booking/booking.route";
 import { divisionRoutes } from "../modules/division/division.routes";
+import paymentRoutes from "../modules/payment/payment.route";
 import { TourRoutes } from "../modules/tour/tour.route";
 import { userRoutes } from "../modules/user/user.route";
 
@@ -31,7 +32,11 @@ const moduleRoutes: IModuleRoute[] = [
   },
   {
     path: "/booking",
-    route: BookingRoute,
+    route: bookingRoute,
+  },
+  {
+    path: "/payment",
+    route: paymentRoutes,
   },
 ];
 
