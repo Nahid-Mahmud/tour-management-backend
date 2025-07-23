@@ -3,6 +3,18 @@ import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { paymentService } from "./payment.service";
 import envVariables from "../../config/env";
+import sendResponse from "../../utils/sendResponse";
+
+const initPayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const bookingId = req.params.bookingId;
+  const result = await paymentService.initPayment(bookingId);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Payment initialized successfully",
+    data: result,
+  });
+});
 
 const successPayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const query = req.query;
@@ -48,4 +60,5 @@ export const paymentController = {
   successPayment,
   failPayment,
   cancelPayment,
+  initPayment,
 };

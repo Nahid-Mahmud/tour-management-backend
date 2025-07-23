@@ -84,12 +84,10 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
       .populate("payment");
 
     const userAddress = (updatedBooking?.user as any).address as string;
-
     const userEmail = (updatedBooking?.user as any).email as string;
-
     const userPhone = (updatedBooking?.user as any).phone as string;
     const userName = (updatedBooking?.user as any).name as string;
-
+    
     const sslPayload: ISSLCommerz = {
       address: userAddress,
       email: userEmail,
