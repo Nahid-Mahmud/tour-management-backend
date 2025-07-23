@@ -106,7 +106,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
 
     return {
       booking: updatedBooking,
-      payment: sslPayment,
+      payment: sslPayment.GatewayPageURL,
     };
   } catch (error) {
     await session.abortTransaction();
