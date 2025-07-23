@@ -56,9 +56,16 @@ const cancelPayment = catchAsync(async (req: Request, res: Response, next: NextF
   }
 });
 
+// const validateRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+//   console.log("message form validate request", req.body);
+//   // redirect to success page
+// //
+// });
+
 export const paymentController = {
   successPayment,
   failPayment,
   cancelPayment,
   initPayment,
+  // validateRequest,
 };

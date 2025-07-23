@@ -20,6 +20,10 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
+
+// need to handle urlencoded data form form or SSLCommerz
+app.use(express.urlencoded({ extended: true }));
+
 app.use(morgan("dev"));
 app.use(cors());
 // cookie parser

@@ -7,9 +7,7 @@ router.post("/init-payment/:bookingId", paymentController.initPayment);
 router.post("/success", paymentController.successPayment);
 router.post("/fail", paymentController.failPayment);
 router.post("/cancel", paymentController.cancelPayment);
-router.post("validate-request", () => {
-  //
-});
+// router.post("/validate-request", paymentController.validateRequest);
 
 const paymentRoutes = router;
 export default paymentRoutes;
