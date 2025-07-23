@@ -17,6 +17,8 @@ const getTransactionId = () => {
 };
 
 const createBooking = async (payload: Partial<IBooking>, userId: string) => {
+  const session = await Booking.startSession();
+
   // validate payload
   if (!payload.guestCount || payload.guestCount <= 0) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Guest count must be a positive integer");
@@ -24,49 +26,71 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
 
   const transactionId = getTransactionId();
 
-  const user = await User.findById(userId);
+  // start session
+  session.startTransaction();
+  try {
+    const user = await User.findById(userId);
+    if (!user?.phone || !user?.address) {
+      throw new AppError(StatusCodes.BAD_REQUEST, "Please Update you profile with phone and address");
+    }
+
+    const tour = await Tour.findById(payload.tour).select("constFrom");
+
+    if (!tour?.constFrom) {
+      throw new AppError(StatusCodes.NOT_FOUND, "Tour not found");
+    }
+
+    const amount = Number(tour.constFrom) * Number(payload.guestCount);
+
+    const booking = await Booking.create(
+      [
+        {
+          user: userId,
+          status: BOOKING_STATUS.PENDING,
+          ...payload,
+        },
+      ],
+      { session }
+    );
+
+    const payment = await Payment.create(
+      [
+        {
+          booking: booking[0]._id,
+          status: PAYMENT_STATUS.UNPAID,
+          transactionId: transactionId,
+          amount: amount,
+        },
+      ],
+      { session }
+    );
+
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      booking[0]._id,
+      {
+        payment: payment[0]._id,
+      },
+      {
+        new: true,
+        runValidators: true,
+        session: session,
+      }
+    )
+      .populate("user", "name email phone address")
+      .populate("tour", "title constFrom")
+      .populate("payment");
+
+    await session.commitTransaction();
+
+    return updatedBooking;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 
   // check for phone and address
-  if (!user?.phone || !user?.address) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Please Update you profile with phone and address");
-  }
-
-  const tour = await Tour.findById(payload.tour).select("constFrom");
-
-  if (!tour?.constFrom) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Tour not found");
-  }
-
-  const amount = Number(tour.constFrom) * Number(payload.guestCount);
-
-  const booking = await Booking.create({
-    user: userId,
-    status: BOOKING_STATUS.PENDING,
-    ...payload,
-  });
-
-  const payment = await Payment.create({
-    booking: booking._id,
-    status: PAYMENT_STATUS.UNPAID,
-    transactionId: transactionId,
-    amount: amount,
-  });
-
-  const updatedBooking = await Booking.findByIdAndUpdate(
-    booking._id,
-    {
-      payment: payment._id,
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  )
-    .populate("user", "name email phone address")
-    .populate("tour", "title constFrom")
-    .populate("payment");
-
-  return updatedBooking;
 };
 
 const getUserBookings = async () => {
