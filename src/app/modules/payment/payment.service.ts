@@ -40,16 +40,15 @@ const successPayment = async (query: Record<string, string>) => {
 
     await session.commitTransaction();
 
-    await session.endSession();
-
     return {
       success: true,
       message: "Payment Completed Successfully",
     };
   } catch (error) {
     await session.abortTransaction();
-    await session.endSession();
     throw error;
+  } finally {
+    await session.endSession();
   }
 };
 
