@@ -59,13 +59,20 @@ const deleteTourType = catchAsync(async (req: Request, res: Response, next: Next
 // ---------------------------- Tour----------------------------- //
 
 const createTour = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  // console.log({ body: req.body.data, files: req.files });
+
   const tourData: Partial<ITour> = req.body;
   const { division, tourType } = tourData;
   if (!division || !tourType) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Division and Tour Type are required");
   }
 
-  const createdTour = await TourService.createTour(tourData);
+  const payload = {
+    ...tourData,
+    images: (req.files as Express.Multer.File[]).map((file) => file.path),
+  };
+
+  const createdTour = await TourService.createTour(payload);
   sendResponse(res, {
     success: true,
     message: "Tour created successfully",
