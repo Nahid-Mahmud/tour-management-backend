@@ -4,11 +4,21 @@ import { catchAsync } from "../../utils/catchAsync";
 import { DivisionService } from "./division.service";
 import sendResponse from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
+import { IDivision } from "./division.interface";
 
 // Function to create a new division
 const createDivision = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const division = req.body;
-  const result = await DivisionService.createDivision(division);
+  // console.log({
+  //   file: req.file,
+  //   body: req.body,
+  // });
+
+  const payload: IDivision = {
+    ...req.body,
+    thumbnail: req.file?.path, // Assuming the file is uploaded and its path is stored in req.file.path
+  };
+
+  const result = await DivisionService.createDivision(payload);
   sendResponse(res, {
     success: true,
     message: "Division created successfully",
