@@ -21,7 +21,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
 
-// need to handle urlencoded data form form or SSLCommerz
+// need to handle urlencoded data from form or SSLCommerz or handling file uploads
 app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
