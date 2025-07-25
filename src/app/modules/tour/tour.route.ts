@@ -44,6 +44,7 @@ router.get("/", checkAuth(...Object.values(UserRole)), TourController.getAllTour
 router.patch(
   "/:id",
   checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  multerUpload.array("files"),
   validateRequest(updateTourZodSchema),
   TourController.updateTour
 );
