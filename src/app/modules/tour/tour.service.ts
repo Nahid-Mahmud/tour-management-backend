@@ -5,6 +5,7 @@ import { Division } from "../division/division.model";
 import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
+import { deleteImageFormCloudinary } from "../../config/cloudinary.config";
 
 // ---------------------------- Tour Type ---------------------------- //
 
@@ -172,10 +173,18 @@ const getAllTours = async (query: Record<string, string>) => {
   };
 };
 
-const updateTour = async (id: string, tourData: Partial<ITour>) => {
+// function to update a tour
+
+const updateTour = async (id: string, payload: Partial<ITour>) => {
+  // Check if the tour exists
+
   const existingTour = await Tour.findById(id);
 
-  const { division, tourType } = tourData;
+  if (!existingTour) {
+    throw new AppError(StatusCodes.NOT_FOUND, `Tour with ID "${id}" does not exist.`);
+  }
+
+  const { division, tourType } = payload;
   if (division) {
     const existingDivision = await Division.findById(division);
     if (!existingDivision) {
@@ -190,10 +199,40 @@ const updateTour = async (id: string, tourData: Partial<ITour>) => {
     }
   }
 
-  if (!existingTour) {
-    throw new AppError(StatusCodes.NOT_FOUND, `Tour with ID "${id}" does not exist.`);
+  // case - if payload contains images and existingTour has images, merge them
+
+  if (payload.images && payload.images.length > 0 && existingTour.images && existingTour.images.length > 0) {
+    payload.images = [...payload.images, ...existingTour.images];
   }
-  const updatedTour = await Tour.findByIdAndUpdate(id, tourData, { new: true, runValidators: true });
+
+  // case handle if user want to delete and update images at the same time
+
+  if (
+    payload.deleteImages &&
+    payload.deleteImages.length > 0 &&
+    existingTour?.images &&
+    existingTour.images.length > 0
+  ) {
+    const restDbImages = existingTour.images.filter((imageUrl) => !payload.deleteImages?.includes(imageUrl));
+
+    const updatedPayloadImages = (payload.images || [])
+      .filter((imageUrl) => !payload.deleteImages?.includes(imageUrl))
+      .filter((imageUrl) => !restDbImages.includes(imageUrl));
+
+    payload.images = [...restDbImages, ...updatedPayloadImages];
+  }
+
+  const updatedTour = await Tour.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+
+  if (
+    payload.deleteImages &&
+    payload.deleteImages.length > 0 &&
+    existingTour?.images &&
+    existingTour.images.length > 0
+  ) {
+    await Promise.all(payload.deleteImages.map((imageUrl) => deleteImageFormCloudinary(imageUrl)));
+  }
+
   return updatedTour;
 };
 
