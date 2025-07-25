@@ -95,18 +95,17 @@ const getAllTours = catchAsync(async (req: Request, res: Response, next: NextFun
 
 const updateTour = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
-  const tourData: Partial<ITour> = req.body;
-
   if (!id) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Tour ID is required");
   }
+  const tourData: Partial<ITour> = req.body;
 
-  const { division, tourType } = tourData;
-  if (!division || !tourType) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Division and Tour Type are required");
-  }
+  const payload = {
+    ...tourData,
+    images: (req.files as Express.Multer.File[]).map((file) => file.path),
+  };
 
-  const updatedTour = await TourService.updateTour(id, tourData);
+  const updatedTour = await TourService.updateTour(id, payload);
   sendResponse(res, {
     success: true,
     message: "Tour updated successfully",
