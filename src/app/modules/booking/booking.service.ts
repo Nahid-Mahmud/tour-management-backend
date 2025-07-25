@@ -1,23 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
+import { PAYMENT_STATUS } from "../payment/payment.interface";
+import Payment from "../payment/payment.model";
 import User from "../user/user.model";
 import { BOOKING_STATUS, IBooking } from "./booking.interface";
 import Booking from "./booking.model";
-import Payment from "../payment/payment.model";
-import { PAYMENT_STATUS } from "../payment/payment.interface";
-import crypto from "crypto";
-import { Tour } from "../tour/tour.model";
-import { SSLService } from "../sslCommerz/sslCommerz.service";
-import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 
-// function to crate a unique transaction ID
-const getTransactionId = () => {
-  // const date = Date.now();
-  // const randomNumber = Math.floor(Math.random() * 1000);
-  const cryptoId = crypto.randomBytes(12).toString("hex");
-  return `tran_${cryptoId}`;
-};
+import { getTransactionId } from "../../utils/getTransactionId";
+import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
+import { SSLService } from "../sslCommerz/sslCommerz.service";
+import { Tour } from "../tour/tour.model";
 
 const createBooking = async (payload: Partial<IBooking>, userId: string) => {
   const session = await Booking.startSession();
@@ -87,7 +80,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     const userEmail = (updatedBooking?.user as any).email as string;
     const userPhone = (updatedBooking?.user as any).phone as string;
     const userName = (updatedBooking?.user as any).name as string;
-    
+
     const sslPayload: ISSLCommerz = {
       address: userAddress,
       email: userEmail,
