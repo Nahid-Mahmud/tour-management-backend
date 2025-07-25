@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
 import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
+import { deleteImageFormCloudinary } from "../../config/cloudinary.config";
 
 // Function to create a new division
 const createDivision = async (payload: IDivision) => {
@@ -40,6 +41,10 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
   }
 
   const updatedDivision = await Division.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+
+  if (payload.thumbnail && existingDivision.thumbnail) {
+    await deleteImageFormCloudinary(existingDivision.thumbnail);
+  }
 
   return updatedDivision;
 };

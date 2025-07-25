@@ -9,6 +9,7 @@ import { multerUpload } from "../../config/multer.config";
 const router = Router();
 
 router.get("/", divisionControllers.getAllDivisions);
+
 router.post(
   "/create",
   checkAuth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
@@ -22,6 +23,7 @@ router.get("/:slug", divisionControllers.getDivisionBySlug);
 router.patch(
   "/:id",
   checkAuth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  multerUpload.single("file"),
   validateRequest(updateDivisionSchema),
   divisionControllers.updateDivision
 );

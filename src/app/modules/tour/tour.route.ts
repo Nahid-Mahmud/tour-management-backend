@@ -43,8 +43,8 @@ router.get("/", checkAuth(...Object.values(UserRole)), TourController.getAllTour
 
 router.patch(
   "/:id",
-  validateRequest(updateTourZodSchema),
   checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  validateRequest(updateTourZodSchema),
   TourController.updateTour
 );
 

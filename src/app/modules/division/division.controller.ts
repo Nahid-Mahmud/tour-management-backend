@@ -8,11 +8,6 @@ import { IDivision } from "./division.interface";
 
 // Function to create a new division
 const createDivision = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  // console.log({
-  //   file: req.file,
-  //   body: req.body,
-  // });
-
   const payload: IDivision = {
     ...req.body,
     thumbnail: req.file?.path, // Assuming the file is uploaded and its path is stored in req.file.path
@@ -41,7 +36,10 @@ const getAllDivisions = catchAsync(async (req: Request, res: Response, next: Nex
 // Function to update a division by ID
 const updateDivision = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
-  const division = req.body;
+  const division: IDivision = {
+    ...req.body,
+    thumbnail: req.file?.path,
+  };
   const result = await DivisionService.updateDivision(id, division);
   sendResponse(res, {
     success: true,
