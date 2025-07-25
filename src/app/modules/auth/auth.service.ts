@@ -5,24 +5,7 @@ import { createNewRefreshToken, generateAuthTokens } from "../../utils/userToken
 import envVariables from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import User from "../user/user.model";
-
-import z from "zod";
-
-const passwordValidationSchema = z
-  .string()
-  .min(8, { message: "Password must be at least 8 characters long" })
-  .regex(/[A-Z]/, {
-    message: "Password must contain at least one uppercase letter",
-  })
-  .regex(/[a-z]/, {
-    message: "Password must contain at least one lowercase letter",
-  })
-  .regex(/[0-9]/, {
-    message: "Password must contain at least one number",
-  })
-  .regex(/[^A-Za-z0-9]/, {
-    message: "Password must contain at least one special character",
-  });
+import { passwordValidationSchema } from "./auth.validation";
 
 const credentialLogin = async (payload: { email: string; password: string }) => {
   const { email, password } = payload;
@@ -67,7 +50,17 @@ const generateAccessTokensUsingRefreshToken = async (refreshToken: string) => {
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const resetPassword = async (oldPassword: string, newPassword: string, decodedToken: JwtPayload) => {
+  return {};
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const setPassword = async (oldPassword: string, newPassword: string, decodedToken: JwtPayload) => {
+  return {};
+};
+
+const changePassword = async (oldPassword: string, newPassword: string, decodedToken: JwtPayload) => {
   if (!decodedToken) {
     throw new AppError(StatusCodes.UNAUTHORIZED, "You are not authorized to perform this action");
   }
@@ -108,4 +101,6 @@ export const authServices = {
   credentialLogin,
   generateAccessTokensUsingRefreshToken,
   resetPassword,
+  changePassword,
+  setPassword,
 };

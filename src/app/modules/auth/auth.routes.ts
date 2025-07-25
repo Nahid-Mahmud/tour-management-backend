@@ -10,6 +10,9 @@ route.post("/login", authControllers.credentialLogin);
 route.post("/refresh-token", authControllers.generateAccessTokensUsingRefreshToken);
 route.post("/logout", authControllers.logout);
 route.patch("/reset-password", checkAuth(...Object.values(UserRole)), authControllers.resetPassword);
+route.patch("/change-password", checkAuth(...Object.values(UserRole)), authControllers.changePassword);
+route.patch("/set-password", checkAuth(...Object.values(UserRole)), authControllers.setPassword);
+
 route.get("/google", async (req: Request, res: Response, next: NextFunction) => {
   const redirect = (req.query.redirect as string) || "/";
   passport.authenticate("google", {
