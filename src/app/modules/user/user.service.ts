@@ -95,8 +95,28 @@ const getAllUsers = async () => {
   return { data: users, meta: totalUsers };
 };
 
+// get user by ID
+const getUserById = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+  return user;
+};
+
+// get logged-in user
+const getMe = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+  return user;
+};
+
 export const userServices = {
   creteUser,
   getAllUsers,
   updateUser,
+  getUserById,
+  getMe,
 };

@@ -28,11 +28,12 @@ passport.use(
         if (!user) {
           return done(null, false, { message: "User not found" });
         }
-
+        if (!user.isVerified) {
+          return done(null, false, { message: "User is not verified" });
+        }
         if (user.isActive === IsActive.BLOCKED || user.isActive === IsActive.INACTIVE) {
           return done(null, false, { message: `User is ${user.isActive}` });
         }
-
         if (user.isDeleted) {
           return done(null, false, { message: "User is deleted" });
         }
@@ -78,6 +79,16 @@ passport.use(
         }
 
         const user = await User.findOne({ email });
+
+        if (user && !user.isVerified) {
+          return done(null, false, { message: "User is not verified" });
+        }
+        if (user && (user.isActive === IsActive.BLOCKED || user.isActive === IsActive.INACTIVE)) {
+          return done(null, false, { message: `User is ${user.isActive}` });
+        }
+        if (user && user.isDeleted) {
+          return done(null, false, { message: "User is deleted" });
+        }
 
         if (!user) {
           const newUser = await User.create({

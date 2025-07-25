@@ -49,8 +49,32 @@ const getAllUsers = catchAsync(async (_req: Request, res: Response, _next: NextF
   });
 });
 
+const getUserById = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  const userId = req.params.userId;
+  const user = await userServices.getUserById(userId);
+  sendResponse(res, {
+    success: true,
+    message: "User retrieved successfully",
+    data: user,
+    statusCode: StatusCodes.OK,
+  });
+});
+
+const getMe = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  const decodedToken = req.user as JwtPayload;
+  const user = await userServices.getMe(decodedToken.userId);
+  sendResponse(res, {
+    success: true,
+    message: "User retrieved successfully",
+    data: user,
+    statusCode: StatusCodes.OK,
+  });
+});
+
 export const userControllers = {
   createUser,
   getAllUsers,
   updateUser,
+  getUserById,
+  getMe,
 };

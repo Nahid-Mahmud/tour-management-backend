@@ -6,6 +6,7 @@ import envVariables from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import User from "../user/user.model";
 import { passwordValidationSchema } from "./auth.validation";
+import { IAuthProvider } from "../user/user.interface";
 
 const credentialLogin = async (payload: { email: string; password: string }) => {
   const { email, password } = payload;
@@ -55,8 +56,36 @@ const resetPassword = async (oldPassword: string, newPassword: string, decodedTo
   return {};
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const setPassword = async (oldPassword: string, newPassword: string, decodedToken: JwtPayload) => {
+const setPassword = async (userId: string, plainPassword: string) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  if (user.password && user.auths.some((providerObject) => providerObject.provider === "google")) {
+    //
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "You have already set a password . Now you can only change it form your profile password Update"
+    );
+  }
+
+  const hashedPassword = await bcryptjs.hash(plainPassword, Number(envVariables.BCRYPT_SALT_ROUNDS));
+
+  const credentialProvider: IAuthProvider = {
+    provider: "credentials",
+    providerId: user.email,
+  };
+
+  const auths: IAuthProvider[] = [...user.auths, credentialProvider];
+
+  user.password = hashedPassword;
+
+  user.auths = auths;
+
+  await user.save();
+
   return {};
 };
 

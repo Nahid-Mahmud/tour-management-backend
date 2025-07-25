@@ -28,6 +28,10 @@ export const checkAuth =
         throw new AppError(StatusCodes.BAD_REQUEST, "User is deleted");
       }
 
+      if (!isUserExist.isVerified) {
+        throw new AppError(StatusCodes.BAD_REQUEST, "User is not verified");
+      }
+
       if (!authRoles.includes(verifiedToken.role)) {
         throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to access this resource");
       }
