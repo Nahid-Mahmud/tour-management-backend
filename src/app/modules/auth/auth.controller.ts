@@ -102,9 +102,9 @@ const logout = catchAsync(async (req: Request, res: Response, _next: NextFunctio
 const resetPassword = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
   const decodedToken = req.user;
 
-  const { oldPassword, newPassword } = req.body;
+  const { newPassword, id } = req.body;
 
-  await authServices.resetPassword(oldPassword, newPassword, decodedToken as JwtPayload);
+  await authServices.resetPassword(newPassword, id, decodedToken as JwtPayload);
 
   sendResponse(res, {
     success: true,
@@ -171,6 +171,24 @@ const googleCallback = catchAsync(async (req: Request, res: Response, _next: Nex
   res.redirect(`${envVariables.FRONTEND_URL}/${redirectTo}`);
 });
 
+const forgotPassword = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Email is required");
+  }
+
+  // Call the service to handle forgot password logic
+  await authServices.forgotPassword(email);
+
+  sendResponse(res, {
+    success: true,
+    message: "Password reset email sent successfully",
+    statusCode: StatusCodes.OK,
+    data: null,
+  });
+});
+
 export const authControllers = {
   credentialLogin,
   logout,
@@ -179,4 +197,5 @@ export const authControllers = {
   generateAccessTokensUsingRefreshToken,
   changePassword,
   setPassword,
+  forgotPassword,
 };
