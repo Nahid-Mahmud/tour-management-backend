@@ -7,6 +7,10 @@ import { PAYMENT_STATUS } from "./payment.interface";
 import Payment from "./payment.model";
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
+import { generateInvoicePDF } from "../../utils/invoice";
+import { ITour } from "../tour/tour.interface";
+import { IUser } from "../user/user.interface";
+import { sendEmail } from "../../utils/sendEmail";
 
 const initPayment = async (bookingId: string) => {
   // Check if booking exists in the payment service
@@ -62,7 +66,7 @@ const successPayment = async (query: Record<string, string>) => {
       }
     );
 
-    await Booking.findByIdAndUpdate(
+    const updatedBooking = await Booking.findByIdAndUpdate(
       updatedPayment?.booking,
       {
         status: BOOKING_STATUS.COMPLETED,
@@ -70,8 +74,45 @@ const successPayment = async (query: Record<string, string>) => {
       {
         session,
         runValidators: true,
+        new: true,
       }
-    );
+    )
+      .populate("tour", "title price")
+      .populate("user", "name email");
+
+    if (!updatedBooking) {
+      throw new AppError(StatusCodes.NOT_FOUND, "Booking not found.");
+    }
+
+    if (!updatedPayment) {
+      throw new AppError(StatusCodes.NOT_FOUND, "Payment not found.");
+    }
+
+    const invoiceData = {
+      bookingDate: updatedBooking?.createdAt as Date,
+      guestCount: updatedBooking?.guestCount,
+      totalAmount: updatedPayment?.amount,
+      tourTitle: (updatedBooking?.tour as unknown as ITour).title,
+      transactionId: updatedPayment?.transactionId,
+      customerName: (updatedBooking?.user as unknown as IUser).name,
+      customerEmail: (updatedBooking?.user as unknown as IUser).email,
+    };
+
+    const pdfBuffer = await generateInvoicePDF(invoiceData);
+
+    await sendEmail({
+      to: (updatedBooking?.user as unknown as IUser).email,
+      subject: "Your Tour Booking Invoice",
+      templateName: "invoice.ejs",
+      templateData: invoiceData,
+      attachments: [
+        {
+          filename: "invoice.pdf",
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
 
     await session.commitTransaction();
 
