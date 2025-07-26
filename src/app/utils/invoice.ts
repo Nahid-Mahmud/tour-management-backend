@@ -14,7 +14,7 @@ export interface InvoiceData {
   totalAmount: number;
 }
 
-export const generateInvoicePDF = async (invoiceData: InvoiceData) => {
+export const generateInvoicePDF = async (invoiceData: InvoiceData): Promise<Buffer<ArrayBufferLike>> => {
   try {
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({
