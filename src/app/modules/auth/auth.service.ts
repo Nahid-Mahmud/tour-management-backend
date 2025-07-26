@@ -6,7 +6,9 @@ import envVariables from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import User from "../user/user.model";
 import { passwordValidationSchema } from "./auth.validation";
-import { IAuthProvider } from "../user/user.interface";
+import { IAuthProvider, IsActive } from "../user/user.interface";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../../utils/sendEmail";
 
 const credentialLogin = async (payload: { email: string; password: string }) => {
   const { email, password } = payload;
@@ -51,9 +53,21 @@ const generateAccessTokensUsingRefreshToken = async (refreshToken: string) => {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const resetPassword = async (oldPassword: string, newPassword: string, decodedToken: JwtPayload) => {
-  return {};
+const resetPassword = async (newPassword: string, id: string, decodedToken: JwtPayload) => {
+  if (decodedToken.userId !== id) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "You are not authorized to perform this action");
+  }
+
+  const isUserExist = await User.findById(decodedToken.userId);
+
+  if (!isUserExist) {
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+  }
+
+  const hashedNewPassword = await bcryptjs.hash(newPassword, Number(envVariables.BCRYPT_SALT_ROUNDS));
+
+  isUserExist.password = hashedNewPassword;
+  await isUserExist.save();
 };
 
 const setPassword = async (userId: string, plainPassword: string) => {
@@ -126,10 +140,52 @@ const changePassword = async (oldPassword: string, newPassword: string, decodedT
   await User.findByIdAndUpdate(userFromDb._id, { password: hashedNewPassword }, { new: true, runValidators: true });
 };
 
+const forgotPassword = async (email: string) => {
+  //
+
+  const isUserExist = await User.findOne({ email });
+
+  if (!isUserExist) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User does not exist");
+  }
+  if (isUserExist.isActive === IsActive.BLOCKED || isUserExist.isActive === IsActive.INACTIVE) {
+    throw new AppError(StatusCodes.BAD_REQUEST, `User is ${isUserExist.isActive}`);
+  }
+  if (isUserExist.isDeleted) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User is deleted");
+  }
+
+  if (!isUserExist.isVerified) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User is not verified");
+  }
+
+  const JwtPayload = {
+    userId: isUserExist._id,
+    email: isUserExist.email,
+    role: isUserExist.role,
+  };
+
+  const resetToken = jwt.sign(JwtPayload, envVariables.ACCESS_TOKEN_JWT_SECRET, {
+    expiresIn: "10m",
+  });
+
+  const resetUILink = `${envVariables.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`;
+  sendEmail({
+    to: isUserExist.email,
+    subject: "Password Reset Request",
+    templateName: "forgetPassword.ejs",
+    templateData: {
+      name: isUserExist.name,
+      resetUILink: resetUILink,
+    },
+  });
+};
+
 export const authServices = {
   credentialLogin,
   generateAccessTokensUsingRefreshToken,
   resetPassword,
   changePassword,
   setPassword,
+  forgotPassword,
 };
