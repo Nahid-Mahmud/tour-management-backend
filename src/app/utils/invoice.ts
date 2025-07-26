@@ -14,7 +14,7 @@ export interface InvoiceData {
   totalAmount: number;
 }
 
-export const generateInvoicePDF = async (invoiceData: InvoiceData): Promise<Buffer<ArrayBufferLike>> => {
+export const generateInvoicePDF = async (invoiceData: InvoiceData): Promise<Buffer> => {
   try {
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({
@@ -27,34 +27,77 @@ export const generateInvoicePDF = async (invoiceData: InvoiceData): Promise<Buff
       doc.on("end", () => resolve(Buffer.concat(buffers)));
       doc.on("error", (error) => reject(error));
 
-      // PDF Content
+      // Colors
+      const primaryColor = "#2c3e50";
+      const secondaryColor = "#7f8c8d";
+      const accentColor = "#3498db";
 
-      //   header
-      doc.fontSize(20).text("Invoice", { align: "center" });
-      doc.moveDown();
+      // Header
+      doc.font("Helvetica-Bold").fontSize(24).fillColor(primaryColor).text("Invoice", { align: "center" });
 
-      // Invoice Details
-      doc.fontSize(14).text(`Transaction Number: ${invoiceData.transactionId}`, { align: "left" });
-      doc.text(`Booking Date: ${invoiceData.bookingDate.toLocaleDateString()}`, { align: "left" });
-      doc.text(`Customer Name: ${invoiceData.customerName}`, { align: "left" });
-      doc.moveDown();
-      // Customer Details
-      doc.text(`Customer Email: ${invoiceData.customerEmail}`, { align: "center" });
-      doc.text(`Tour Title: ${invoiceData.tourTitle}`, { align: "center" });
-      doc.text(`Guest Count: ${invoiceData.guestCount}`, { align: "center" });
-      doc.text(`Total Amount: ${invoiceData.totalAmount.toFixed(2)}`, { align: "center" });
+      doc.moveDown(2);
 
-      // Footer
-      doc.moveDown();
-      doc.fontSize(10).text("Thank you for booking with us.", { align: "center" });
-      doc.text("If you have any questions, please contact us.", { align: "center" });
+      // Section Title
+      doc.font("Helvetica-Bold").fontSize(14).fillColor(primaryColor).text("Invoice Details", { underline: true });
 
-      // Finalize the PDF and end the stream
+      doc.moveDown(1);
+
+      // Invoice Detail Fields
+      const details = [
+        { label: "Transaction Number:", value: invoiceData.transactionId },
+        { label: "Booking Date:", value: invoiceData.bookingDate.toLocaleDateString() },
+        { label: "Customer Name:", value: invoiceData.customerName },
+        { label: "Customer Email:", value: invoiceData.customerEmail },
+        { label: "Tour Title:", value: invoiceData.tourTitle },
+        { label: "Guest Count:", value: invoiceData.guestCount.toString() },
+        { label: "Total Amount:", value: `$${invoiceData.totalAmount.toFixed(2)}` },
+      ];
+
+      const labelX = 50;
+      // const valueX = 200;
+      const labelWidth = 140; // Fixed width for labels
+      let currentY = doc.y;
+
+      details.forEach(({ label, value }) => {
+        doc.font("Helvetica-Bold").fontSize(12).fillColor(primaryColor).text(label, labelX, currentY);
+
+        doc
+          .font("Helvetica")
+          .fontSize(12)
+          .fillColor(secondaryColor)
+          .text(value, labelX + labelWidth, currentY);
+
+        currentY += 20;
+      });
+
+      // Separator Line
+      doc
+        .moveTo(50, currentY + 10)
+        .lineTo(550, currentY + 10)
+        .strokeColor(accentColor)
+        .lineWidth(1)
+        .stroke();
+
+      const footerText1 = "Thank you for booking with us.";
+      const footerText2 = "If you have any questions, please contact us.";
+
+      // Perfect center by using full width and alignment
+      doc
+        .moveDown(2)
+        .font("Helvetica-Oblique")
+        .fontSize(10)
+        .fillColor(secondaryColor)
+        .text(footerText1, 50, doc.y, { width: 500, align: "center" })
+        .text(footerText2, 50, doc.y, { width: 500, align: "center" });
+
+      // Border around the page
+      doc.lineWidth(0.5).strokeColor(secondaryColor).rect(30, 30, 535, 732).stroke();
+
+      // Finalize
       doc.end();
     });
   } catch (error: any) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating invoice PDF:", error);
+    // console.error("Error generating invoice PDF:", error);
     throw new AppError(HttpStatusCode.InternalServerError, `Failed to generate invoice PDF: ${error.message}`);
   }
 };
