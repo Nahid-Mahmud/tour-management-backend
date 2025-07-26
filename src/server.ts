@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import { app } from "./app";
 import envVariables from "./app/config/env";
 import { seedSuperAdmin } from "./app/utils/seedSuperAdmin";
-import { connectRedis } from "./app/config/radis.config";
+import { connectRedis } from "./app/config/redis.config";
 
 let server: Server;
 
