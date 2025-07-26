@@ -15,3 +15,8 @@ export const passwordValidationSchema = z
   .regex(/[^A-Za-z0-9]/, {
     message: "Password must contain at least one special character",
   });
+
+export const resetPasswordZodSchema = z.object({
+  newPassword: passwordValidationSchema,
+  id: z.string().min(1, { message: "User ID is required" }),
+});
