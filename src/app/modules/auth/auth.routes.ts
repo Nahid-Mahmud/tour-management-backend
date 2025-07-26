@@ -4,16 +4,23 @@ import { checkAuth } from "../../middlewares/checkAuth";
 import { UserRole } from "../user/user.interface";
 import { authControllers } from "./auth.controller";
 import envVariables from "../../config/env";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { resetPasswordZodSchema } from "./auth.validation";
 
 const route = Router();
 
 route.post("/login", authControllers.credentialLogin);
 route.post("/refresh-token", authControllers.generateAccessTokensUsingRefreshToken);
 route.post("/logout", authControllers.logout);
-route.patch("/reset-password", checkAuth(...Object.values(UserRole)), authControllers.resetPassword);
+route.patch(
+  "/reset-password",
+  validateRequest(resetPasswordZodSchema),
+  checkAuth(...Object.values(UserRole)),
+  authControllers.resetPassword
+);
 route.patch("/change-password", checkAuth(...Object.values(UserRole)), authControllers.changePassword);
 route.post("/set-password", checkAuth(...Object.values(UserRole)), authControllers.setPassword);
-// route.post("/forgot-password", authControllers.forgotPassword);
+route.post("/forgot-password", authControllers.forgotPassword);
 
 route.get("/google", async (req: Request, res: Response, next: NextFunction) => {
   const redirect = (req.query.redirect as string) || "/";
