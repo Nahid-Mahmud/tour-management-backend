@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
-import { hashPassword } from "../../utils/hashPassword";
 import AppError from "../../errorHelpers/AppError";
+import { hashPassword } from "../../utils/hashPassword";
 import { IAuthProvider, IUser, UserRole } from "./user.interface";
 import User from "./user.model";
 
@@ -42,15 +42,13 @@ const creteUser = async (payload: Partial<IUser>) => {
 
 // update user
 const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken: JwtPayload) => {
-  // check if user exists
-
-  if (
-    userId !== decodedToken.userId &&
-    decodedToken.role !== UserRole.SUPER_ADMIN &&
-    decodedToken.role !== UserRole.ADMIN
-  ) {
-    throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to update this user");
+  if (decodedToken.role === UserRole.USER || decodedToken.role === UserRole.GUIDE) {
+    if (userId !== decodedToken.userId) {
+      throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to update this user");
+    }
   }
+
+  // check if user exists
 
   const user = await User.findById(decodedToken.userId);
 
@@ -60,13 +58,17 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
 
   // role update validation
 
+  if (decodedToken.role === UserRole.ADMIN && user.role === UserRole.SUPER_ADMIN) {
+    throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to update this user");
+  }
+
   if (payload.role) {
     if (decodedToken.role === UserRole.USER || decodedToken.role === UserRole.GUIDE) {
       throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
     }
-    if (payload.role === UserRole.SUPER_ADMIN && decodedToken.role === UserRole.ADMIN) {
-      throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
-    }
+    // if (payload.role === UserRole.SUPER_ADMIN && decodedToken.role === UserRole.ADMIN) {
+    //   throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user role");
+    // }
   }
 
   // isActive, isDeleted, isVerified update validation
@@ -74,11 +76,6 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
     if (decodedToken.role === UserRole.USER || decodedToken.role === UserRole.GUIDE) {
       throw new AppError(StatusCodes.FORBIDDEN, "You do not have permission to change user status");
     }
-  }
-
-  // password update hashing
-  if (payload.password) {
-    payload.password = await hashPassword(payload.password as string);
   }
 
   const updatedUser = await User.findByIdAndUpdate(userId, payload, {
