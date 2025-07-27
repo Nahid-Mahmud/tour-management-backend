@@ -56,6 +56,19 @@ const cancelPayment = catchAsync(async (req: Request, res: Response, next: NextF
   }
 });
 
+const getInvoiceDownloadUrl = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const paymentId = req.params.paymentId;
+
+  const result = await paymentService.getInvoiceDownloadUrl(paymentId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Invoice URL retrieved successfully",
+    data: result,
+  });
+});
+
 // const validateRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 //   console.log("message form validate request", req.body);
 //   // redirect to success page
@@ -67,5 +80,6 @@ export const paymentController = {
   failPayment,
   cancelPayment,
   initPayment,
+  getInvoiceDownloadUrl,
   // validateRequest,
 };
