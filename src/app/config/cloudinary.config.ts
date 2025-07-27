@@ -1,7 +1,9 @@
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../errorHelpers/AppError";
 import envVariables from "./env";
+import crypto from "crypto";
+import stream from "stream";
 
 cloudinary.config({
   cloud_name: envVariables.CLOUDINARY.CLOUDINARY_CLOUD_NAME,
@@ -38,6 +40,39 @@ export const deleteImageFormCloudinary = async (url: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
+export const uploadBufferToCloudinary = async (
+  buffer: Buffer,
+  fileName: string
+): Promise<UploadApiResponse | undefined> => {
+  try {
+    return new Promise((resolve, reject) => {
+      const public_id = `pdf/${fileName}-${Date.now()}-${crypto.randomBytes(12).toString("hex")}`;
+      const bufferStream = new stream.PassThrough();
+
+      bufferStream.end(buffer);
+
+      cloudinary.uploader
+        .upload_stream(
+          {
+            resource_type: "auto",
+            public_id,
+            folder: "pdf",
+          },
+          (error, result) => {
+            if (error) {
+              return reject(error);
+            }
+            resolve(result);
+          }
+        )
+        .end(buffer);
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, `Failed to upload image to Cloudinary. ${error.message}`);
   }
 };
 
