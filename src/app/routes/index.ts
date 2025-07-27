@@ -4,6 +4,7 @@ import bookingRoute from "../modules/booking/booking.route";
 import { divisionRoutes } from "../modules/division/division.routes";
 import { otpRoutes } from "../modules/otp/otp.routes";
 import paymentRoutes from "../modules/payment/payment.route";
+import { statsRoutes } from "../modules/stats/stats.route";
 import { TourRoutes } from "../modules/tour/tour.route";
 import { userRoutes } from "../modules/user/user.route";
 
@@ -42,6 +43,10 @@ const moduleRoutes: IModuleRoute[] = [
   {
     path: "/otp",
     route: otpRoutes,
+  },
+  {
+    path: "/stats",
+    route: statsRoutes,
   },
 ];
 
