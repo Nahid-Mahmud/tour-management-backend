@@ -1,4 +1,6 @@
 import Booking from "../booking/booking.model";
+import { PAYMENT_STATUS } from "../payment/payment.interface";
+import Payment from "../payment/payment.model";
 import { Tour } from "../tour/tour.model";
 import { IsActive } from "../user/user.interface";
 import User from "../user/user.model";
@@ -314,7 +316,77 @@ const getBookingStats = async () => {
 };
 
 // get stats about payments
-const getPaymentStats = async () => {};
+const getPaymentStats = async () => {
+  const totalPaymentsPromise = Payment.countDocuments();
+
+  const totalPaymentByStatusPromise = Payment.aggregate([
+    {
+      // group by status and count total payments in each
+
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $unwind: "$_id",
+    },
+  ]);
+
+  const totalRevenuePromise = Payment.aggregate([
+    // stage 1 - match payments
+    {
+      $match: {
+        status: PAYMENT_STATUS.PAID, // exclude pending payments
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: "$amount" },
+      },
+    },
+  ]);
+
+  const averagePaymentAmountPromise = Payment.aggregate([
+    // group
+    {
+      $group: {
+        _id: null,
+        averagePaymentAmount: { $avg: "$amount" },
+      },
+    },
+  ]);
+
+  const paymentGatewayDataPromise = Payment.aggregate([
+    // stage group
+    {
+      $group: {
+        _id: {
+          $ifNull: ["$paymentGatewayData.status", "Unknown"],
+        },
+        totalCount: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const [totalPayments, totalRevenue, totalPaymentByStatus, averagePaymentAmount, paymentGatewayData] =
+    await Promise.all([
+      totalPaymentsPromise,
+      totalRevenuePromise,
+      totalPaymentByStatusPromise,
+      averagePaymentAmountPromise,
+      paymentGatewayDataPromise,
+    ]);
+
+  return {
+    totalPayments,
+    totalRevenue,
+    totalPaymentByStatus,
+    averagePaymentAmount,
+    paymentGatewayData,
+  };
+};
 export const statsService = {
   getBookingStats,
   getTourStats,
