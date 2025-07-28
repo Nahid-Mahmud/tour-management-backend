@@ -72,7 +72,6 @@ const getInvoiceDownloadUrl = catchAsync(async (req: Request, res: Response, nex
 
 const validatePayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   await SSLService.validatePayment(req.body);
-
   sendResponse(res, {
     statusCode: 200,
     success: true,
