@@ -6,12 +6,11 @@ interface TokenInfo {
 }
 
 export const setAuthCookie = (res: Response, tokenInfo: TokenInfo) => {
-
   if (tokenInfo.accessToken) {
     res.cookie("accessToken", tokenInfo.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 60 * 60 * 1000 * 24, // 1 day
     });
   }
@@ -20,7 +19,7 @@ export const setAuthCookie = (res: Response, tokenInfo: TokenInfo) => {
     res.cookie("refreshToken", tokenInfo.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 60 * 60 * 1000 * 24 * 30, // 30 days
     });
   }

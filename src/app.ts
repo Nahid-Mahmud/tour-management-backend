@@ -34,6 +34,10 @@ app.use(
     credentials: true, // Allow cookies to be sent with requests
   })
 );
+
+// trust proxy
+app.set("trust proxy", 1);
+
 // cookie parser
 app.use(cookieParser());
 
