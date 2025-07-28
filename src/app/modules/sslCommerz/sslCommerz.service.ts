@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { StatusCodes } from "http-status-codes";
 import envVariables from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import { ISSLCommerz } from "./sslCommerz.interface";
 import axios from "axios";
+import Payment from "../payment/payment.model";
 
 const sslPaymentInit = async (payload: ISSLCommerz) => {
   try {
@@ -77,6 +79,31 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const validatePayment = async (payload: any) => {
+  try {
+    const response = await axios({
+      method: "get",
+      url: `${envVariables.SSL.SSL_VALIDATION_API}?val_id=${payload.val_id}&store_id={${envVariables.SSL.SSL_STORE_ID}&store_passwd=${envVariables.SSL.SSL_STORE_PASSWORD}`,
+    });
+
+    await Payment.updateOne(
+      {
+        transactionId: payload.tran_id,
+      },
+      {
+        paymentGatewayData: response.data,
+      },
+      {
+        runValidators: true,
+      }
+    );
+  } catch (error) {
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, "Payment validation failed");
+  }
+};
+
 export const SSLService = {
   sslPaymentInit,
+  validatePayment,
 };

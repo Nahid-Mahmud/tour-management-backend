@@ -4,6 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { paymentService } from "./payment.service";
 import envVariables from "../../config/env";
 import sendResponse from "../../utils/sendResponse";
+import { SSLService } from "../sslCommerz/sslCommerz.service";
 
 const initPayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const bookingId = req.params.bookingId;
@@ -69,6 +70,17 @@ const getInvoiceDownloadUrl = catchAsync(async (req: Request, res: Response, nex
   });
 });
 
+const validatePayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  await SSLService.validatePayment(req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Payment validated successfully",
+    data: null,
+  });
+});
+
 // const validateRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 //   console.log("message form validate request", req.body);
 //   // redirect to success page
@@ -81,5 +93,5 @@ export const paymentController = {
   cancelPayment,
   initPayment,
   getInvoiceDownloadUrl,
-  // validateRequest,
+  validatePayment,
 };
