@@ -6,10 +6,10 @@ import { ZodError } from "zod";
 import envVariables from "../config/env";
 import AppError from "../errorHelpers/AppError";
 import { TErrorSources } from "../interfaces/error.types";
-import { handleDuplicateKeyError } from "../helpers/handleDuplicateKeyError";
-import { handleCastError } from "../helpers/handleCastError";
-import { handleValidationError } from "../helpers/handleValidationError";
-import { handleZodError } from "../helpers/handleZodError";
+import { handleDuplicateKeyError } from "../errorHelpers/handleDuplicateKeyError";
+import { handleCastError } from "../errorHelpers/handleCastError";
+import { handleValidationError } from "../errorHelpers/handleValidationError";
+import { handleZodError } from "../errorHelpers/handleZodError";
 import { deleteImageFormCloudinary } from "../config/cloudinary.config";
 
 export const globalErrorHandler = async (err: any, req: Request, res: Response, next: NextFunction) => {
