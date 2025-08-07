@@ -30,7 +30,7 @@ app.use(morgan("dev"));
 // CORS configuration
 app.use(
   cors({
-    origin: [envVariables.FRONTEND_URL],
+    origin: [envVariables.FRONTEND_URL, "http://localhost:3000"],
     credentials: true, // Allow cookies to be sent with requests
   })
 );
