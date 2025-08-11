@@ -10,7 +10,7 @@ export const checkAuth =
   (...authRoles: UserRole[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const accessToken = req.headers.authorization;
+      const accessToken = req.headers.authorization || req.cookies.accessToken;
       if (!accessToken) {
         throw new AppError(StatusCodes.UNAUTHORIZED, "Access token is required");
       }
