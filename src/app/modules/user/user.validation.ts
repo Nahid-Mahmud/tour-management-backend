@@ -1,7 +1,7 @@
 import z from "zod";
 import { IsActive, UserRole } from "./user.interface";
 
-export const createUserSchema = z.object({
+export const createUserSchema = z.object({     
   name: z
     .string()
     .min(2, { message: "Name must be at least 2 characters long" })

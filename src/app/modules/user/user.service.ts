@@ -6,7 +6,7 @@ import { IAuthProvider, IUser, UserRole } from "./user.interface";
 import User from "./user.model";
 
 // create user
-const creteUser = async (payload: Partial<IUser>) => {
+const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
   if (!email || !password) {
@@ -111,7 +111,7 @@ const getMe = async (userId: string) => {
 };
 
 export const userServices = {
-  creteUser,
+  createUser,
   getAllUsers,
   updateUser,
   getUserById,
